@@ -11,8 +11,6 @@ const generator = require('generate-password'); */
 const moment = require("moment"); 
 const { url } = require('inspector');
 const time = new Date(Date.now()).toLocaleString();
-const amqplib = require("amqplib");
-const amqp_url = process.env.RABBIT_URL;
 
 function twoDigits(d) {
   if (0 <= d && d < 10) return "0" + d.toString();

@@ -39,7 +39,7 @@ exports.login = asyncHandler(async (req, res, next) => {
       new ErrorResponse("Email or password is incorrect", 200, "E301-103")
     );
   }
-  const get_user = await helper.UserHelper.getUserWithRrsCodes(check_user._id);
+  const get_user = await helper.UserHelper.getUser(check_user._id);
   if (check_user.firstLogin == 1) {
     utils.sendNoTokenResponse(
       get_user,

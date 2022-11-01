@@ -121,7 +121,7 @@ exports.mail = asyncHandler(async (req, res, next) => {
     const create_email_log = await helper.EmailLogHelper.createEmailLog(
       email_log_data
     );
-    console.log(`*** emaillog added ***`);
+    console.log(`*** email log added ***`);
 
     return utils.send_json_response({
       res,
