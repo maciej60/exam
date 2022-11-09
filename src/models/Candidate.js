@@ -5,48 +5,21 @@ const _ = require("lodash");
 const generator = require("generate-password");
 const utils = require("../utils");
 
-const examConfig = new mongoose.Schema({
-    examCode: String,
-    canReview: {
-        type: Number,
-        default: 0,
-    },
-    canCreate: {
-        type: Number,
-        default: 0,
-    }
-});
-
-const applicationConfig = new mongoose.Schema({
-    canDelete: {
-        type: Number,
-        default: 0,
-    },
-    canReview: {
-        type: Number,
-        default: 0,
-    },
-})
-
-const isCandidate = new mongoose.Schema({
+const isUser = new mongoose.Schema({
     yes: {
         type: Number,
         default: 0,
     },
-    candidateId: {
+    userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "candidates",
+        ref: "users",
     }
-})
-
-const userConfig = new mongoose.Schema({
-    examConfig: [examConfig],
-    applicationConfig,
-    isCandidate
 });
 
-const UserSchema = new mongoose.Schema(
+const CandidateSchema = new mongoose.Schema(
     {
+        isUser,
+        title: String,
         firstName: {
             type: String,
             trim: true,
@@ -59,9 +32,11 @@ const UserSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
-        userName: {
+        candidateCode: {
             type: String,
             trim: true,
+            required: true,
+            unique: true,
         },
         email: {
             type: String,
@@ -76,6 +51,18 @@ const UserSchema = new mongoose.Schema(
         password: {
             type: String,
         },
+        candidateType: {
+            type: String,
+            default: 'Employee',
+        },
+        gender: {
+            type: String,
+            trim: true,
+        },
+        photoUrl: {
+            type: String,
+            trim: true,
+        },
         firstLogin: {
             type: Number,
             default: 1,
@@ -85,12 +72,7 @@ const UserSchema = new mongoose.Schema(
             type: Number,
             default: 1,
         },
-        isAdmin: {
-            type: Number,
-            default: 0,
-        },
         passwordResets: Array,
-        userConfig,
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
@@ -99,9 +81,9 @@ const UserSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
-UserSchema.index({ "email": 1, "institutionId": 1}, { "unique": true });
-UserSchema.index({ "phone": 1, "institutionId": 1}, { "unique": true });
-UserSchema.pre("save", function (next) {
+CandidateSchema.index({ "email": 1, "institutionId": 1}, { "unique": true });
+CandidateSchema.index({ "phone": 1, "institutionId": 1}, { "unique": true });
+CandidateSchema.pre("save", function (next) {
     /**
      * if password is not provided, put this bcrypt code for 'password'
      */
@@ -132,30 +114,17 @@ UserSchema.pre("save", function (next) {
     next();
 });
 
-UserSchema.pre("updateOne", function () {
+CandidateSchema.pre("updateOne", function () {
     /**
      * here we have access to the query object not the data object because mongoose will query the doc before updating
-     * so u can only modify the query object so as to fetch the correct data for the update
+     * so u can only modify the query object to fetch the correct data for the update
      */
     this.set({ firstName: this._update.$set.firstName.toUpperCase() });
     this.set({ lastName: this._update.$set.lastName.toUpperCase() });
     this.set({ middleName: this._update.$set.middleName.toUpperCase() });
     this.set({ email: this._update.$set.email.toLowerCase() });
-    let u = "";
-    this.set({ userName: u.toUpperCase() });
 });
 
-/* UserSchema.virtual("userName").get(function () {
-  let name = "";
-  if (parseInt(this.userType) == 1)
-    name = this.lastName + " " + this.firstName + " " + this.middleName;
-  else name = this.companyName;
-  return name;
-}); */
-
-/* UserSchema.set("toObject", { virtuals: true });
-UserSchema.set("toJSON", { virtuals: true }); */
-
-UserSchema.plugin(mongoosePaginate);
-UserSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('users', UserSchema);
+CandidateSchema.plugin(mongoosePaginate);
+CandidateSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('candidates', CandidateSchema);
