@@ -7,21 +7,22 @@ const topicReferenceSchema = new mongoose.Schema({
         fileType: String,
         fileSizeInKb: Number,
         publicationYear: Number,
-        institutionId: {
-            type: mongoose.Schema.Types.ObjectId,
-            required: true,
-            ref: "institutions",
-        },
         subjectId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institution_subjects",
+            ref: "lms_subjects",
         },
         topicId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institution_subject_topics",
+            ref: "lms_subject_topics",
         },
+        subTopicId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "lms_sub_topics",
+        },
+        tags: Array,
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
@@ -30,5 +31,5 @@ const topicReferenceSchema = new mongoose.Schema({
     },
     { timestamps: true });
 
-topicReferenceSchema.index({ "title": 1, "topicId": 1, "author": 1}, { "unique": true });
-module.exports = mongoose.model('institution_subject_topics', topicReferenceSchema);
+topicReferenceSchema.index({ "title": 1, "subTopicId": 1, "author": 1}, { "unique": true });
+module.exports = mongoose.model('lms_topic_references', topicReferenceSchema);

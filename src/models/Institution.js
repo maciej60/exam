@@ -41,6 +41,7 @@ const InstitutionSchema = new mongoose.Schema(
             trim: true,
             unique: true
         },
+        logo: String,
         institutionConfig,
         businessId: {
             type: mongoose.Schema.Types.ObjectId,

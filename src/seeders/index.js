@@ -95,7 +95,7 @@ console.log('seeding started...');
             name: "WORKFLOW",
           },
           {
-            name: "PAYMENT",
+            name: "LMS",
           },
           {
             name: "EXAM",
