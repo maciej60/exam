@@ -19,4 +19,4 @@ const EmailLogSchema = new mongoose.Schema(
 );
 EmailLogSchema.plugin(mongoosePaginate);
 EmailLogSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model("email_logs", EmailLogSchema);
+module.exports = mongoose.model("EmailLog", EmailLogSchema, 'email_logs');

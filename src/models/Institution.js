@@ -46,7 +46,7 @@ const InstitutionSchema = new mongoose.Schema(
         businessId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "business",
+            ref: "Business",
         },
         modules: Array,
     },
@@ -78,4 +78,4 @@ InstitutionSchema.pre("updateOne", function () {
 
 InstitutionSchema.plugin(mongoosePaginate);
 InstitutionSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('institutions', InstitutionSchema);
+module.exports = mongoose.model('Institution', InstitutionSchema, 'institutions');

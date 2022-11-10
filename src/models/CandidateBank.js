@@ -13,12 +13,12 @@ const candidateBank = new mongoose.Schema({
     candidateId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: "candidates",
+        ref: "Candidate",
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: "users",
+        ref: "User",
     },
 },
     { timestamps: true }
@@ -26,4 +26,4 @@ const candidateBank = new mongoose.Schema({
 
 candidateBank.plugin(mongoosePaginate);
 candidateBank.plugin(aggregatePaginate);
-module.exports = mongoose.model('candidate_bank', candidateBank);
+module.exports = mongoose.model('CandidateBank', candidateBank, 'candidate_banks');

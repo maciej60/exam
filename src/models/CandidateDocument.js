@@ -13,17 +13,17 @@ const candidateDocument = new mongoose.Schema({
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institutions",
+            ref: "Institution",
         },
         candidateId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "candidates",
+            ref: "Candidate",
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true }
@@ -32,4 +32,4 @@ candidateDocument.index({ "documentType": 1, "institutionId": 1, "candidateId": 
 
 candidateDocument.plugin(mongoosePaginate);
 candidateDocument.plugin(aggregatePaginate);
-module.exports = mongoose.model('candidate_document', candidateDocument);
+module.exports = mongoose.model('CandidateDocument', candidateDocument, 'candidate_documents');

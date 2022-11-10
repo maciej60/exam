@@ -6,12 +6,12 @@ const institutionSubjectTopicSchema = new mongoose.Schema({
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institutions",
+            ref: "Institution",
         },
         subjectId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institution_subjects",
+            ref: "InstitutionSubject",
         },
         status: {
             type: Number,
@@ -20,11 +20,11 @@ const institutionSubjectTopicSchema = new mongoose.Schema({
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true });
 
 institutionSubjectTopicSchema.index({ "name": 1, "subjectId": 1}, { "unique": true });
 institutionSubjectTopicSchema.index({ "code": 1, "subjectId": 1}, { "unique": true });
-module.exports = mongoose.model('institution_subject_topics', institutionSubjectTopicSchema);
+module.exports = mongoose.model('InstitutionSubjectTopic', institutionSubjectTopicSchema, 'institution_subject_topics');

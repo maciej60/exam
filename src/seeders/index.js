@@ -16,15 +16,15 @@ console.log('seeding started...');
       prepend: "",
       replace: { replace_from: "", replace_with: "" },
     });
-    let getModelFileNameArray = await utils.getFileArray({
+    let modelFileNameArray = await utils.getFileArray({
       path: normalizedPath,
       append: "",
       prepend: "",
-      replace: { replace_from: ".js", replace_with: "s" },
+      replace: { replace_from: ".js", replace_with: "" },
     });
-    let modelFileNameArray = await utils.pascal_to_underscore(
+    /*let modelFileNameArray = await utils.pascal_to_underscore(
       getModelFileNameArray
-    );
+    );*/
 
     await logger.filecheck(
       `INFO: Seeder ran with modelFileArray: ${JSON.stringify(
@@ -40,26 +40,18 @@ console.log('seeding started...');
     /**
      * drop db and remove sticky constraints and unnecessary unique keys
      */
-    mongoose.connect(
+    await mongoose.connect(
       process.env.MONGO_URI,
       {
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useFindAndModify: false,
-        useUnifiedTopology: true,
       },
       function () {
         mongoose.connection.db.dropDatabase();
       }
     );
 
-    seeder.connect(
+    await seeder.connect(
       process.env.MONGO_URI,
       {
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useFindAndModify: false,
-        useUnifiedTopology: true,
       },
       function () {
         seeder.loadModels(modelFileArray);
@@ -73,7 +65,7 @@ console.log('seeding started...');
 
     let data = [
       {
-        model: "users",
+        model: "User",
         documents: [
           {
             userName: "admin",
@@ -89,7 +81,7 @@ console.log('seeding started...');
         ],
       },
       {
-        model: "modules",
+        model: "Module",
         documents: [
           {
             name: "WORKFLOW",
@@ -106,7 +98,7 @@ console.log('seeding started...');
         ],
       },
       {
-        model: "business",
+        model: "Business",
         documents: [
           {
             name: "GLOBAL",
@@ -117,7 +109,7 @@ console.log('seeding started...');
         ],
       },
       {
-        model: "school_programmes",
+        model: "SchoolProgramme",
         documents: [
           {
             name: "UNDERGRADUATE",
@@ -143,7 +135,7 @@ console.log('seeding started...');
         ],
       },
       {
-        model: "candidate_types",
+        model: "CandidateType",
         documents: [
           {
             name: "EMPLOYEE",
@@ -154,7 +146,7 @@ console.log('seeding started...');
         ],
       },
       {
-        model: "question_types",
+        model: "QuestionType",
         documents: [
           {
             name: "OBJECTIVE",
@@ -168,7 +160,7 @@ console.log('seeding started...');
         ],
       },
       {
-        model: "grades",
+        model: "Grade",
         documents: [
           {
             name: "First Class",
@@ -191,7 +183,7 @@ console.log('seeding started...');
         ],
       },
       {
-        model: "qualifications",
+        model: "Qualification",
         documents: [
           {
             name: "Diploma",

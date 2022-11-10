@@ -7,21 +7,21 @@ const examCoordinatorSchema = new mongoose.Schema({
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institutions",
+            ref: "Institution",
         },
         examId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "exams",
+            ref: "Exam",
         },
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "users",
+            ref: "User",
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true }
@@ -30,4 +30,4 @@ examCoordinatorSchema.index({ "examId": 1, "userId": 1}, { "unique": true });
 
 examCoordinatorSchema.plugin(mongoosePaginate);
 examCoordinatorSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('exam_coordinator', examCoordinatorSchema);
+module.exports = mongoose.model('ExamCoordinator', examCoordinatorSchema, 'exam_coordinator');

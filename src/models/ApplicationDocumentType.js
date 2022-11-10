@@ -5,7 +5,7 @@ const applicationDocumentTypeSchema = new mongoose.Schema({
     institutionId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: "institutions",
+        ref: "Institution",
     },
     maxFileSizeInKb: {
         type: Number,
@@ -18,4 +18,4 @@ const applicationDocumentTypeSchema = new mongoose.Schema({
     },
 })
 
-module.exports = mongoose.model('application_document_types', applicationDocumentTypeSchema);
+module.exports = mongoose.model('ApplicationDocumentType', applicationDocumentTypeSchema, 'application_document_type');

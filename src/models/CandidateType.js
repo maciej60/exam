@@ -5,4 +5,4 @@ const candidateTypeSchema = new mongoose.Schema({
     }
 );
 
-module.exports = mongoose.model('candidate_types', candidateTypeSchema);
+module.exports = mongoose.model('CandidateType', candidateTypeSchema, 'candidate_types');

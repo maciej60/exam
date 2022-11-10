@@ -7,17 +7,22 @@ const questionBankSchema = new mongoose.Schema({
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institutions",
+            ref: "Institution",
         },
         subjectId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institution_subjects",
+            ref: "InstitutionSubject",
         },
         topicId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institution_subject_topics",
+            ref: "InstitutionSubjectTopic",
+        },
+        subTopicId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "InstitutionSubTopic",
         },
         questionType: String,
         question: String,
@@ -27,13 +32,13 @@ const questionBankSchema = new mongoose.Schema({
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true }
 );
-questionBankSchema.index({ "examId": 1, "subjectId": 1}, { "unique": true });
+questionBankSchema.index({ "subTopicId": 1, "question": 1}, { "unique": true });
 
 questionBankSchema.plugin(mongoosePaginate);
 questionBankSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('question_bank', questionBankSchema);
+module.exports = mongoose.model('QuestionBank', questionBankSchema, 'question_bank');

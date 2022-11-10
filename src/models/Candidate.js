@@ -127,4 +127,4 @@ CandidateSchema.pre("updateOne", function () {
 
 CandidateSchema.plugin(mongoosePaginate);
 CandidateSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('candidates', CandidateSchema);
+module.exports = mongoose.model('Candidate', CandidateSchema);

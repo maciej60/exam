@@ -16,4 +16,4 @@ const DeletedDataSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("deleted_data", DeletedDataSchema);
+module.exports = mongoose.model("DeletedData", DeletedDataSchema, 'deleted_data');

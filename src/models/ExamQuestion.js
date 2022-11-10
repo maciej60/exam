@@ -7,22 +7,37 @@ const examQuestionSchema = new mongoose.Schema({
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institutions",
+            ref: "Institution",
         },
         examId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "exams",
+            ref: "Exam",
+        },
+        subjectId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "InstitutionSubject",
+        },
+        topicId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "InstitutionSubjectTopic",
+        },
+        subTopicId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "InstitutionSubTopic",
         },
         questionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "question_bank",
+            ref: "QuestionBank",
         },
         questionMark: Number,
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true }
@@ -31,4 +46,4 @@ examQuestionSchema.index({ "examId": 1, "questionId": 1}, { "unique": true });
 
 examQuestionSchema.plugin(mongoosePaginate);
 examQuestionSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('exam_questions', examQuestionSchema);
+module.exports = mongoose.model('ExamQuestion', examQuestionSchema, 'exam_questions');

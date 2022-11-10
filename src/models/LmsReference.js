@@ -10,26 +10,26 @@ const topicReferenceSchema = new mongoose.Schema({
         subjectId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "lms_subjects",
+            ref: "LmsSubject",
         },
         topicId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "lms_subject_topics",
+            ref: "LmsSubjectTopic",
         },
         subTopicId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "lms_sub_topics",
+            ref: "LmsSubTopic",
         },
         tags: Array,
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true });
 
 topicReferenceSchema.index({ "title": 1, "subTopicId": 1, "author": 1}, { "unique": true });
-module.exports = mongoose.model('lms_topic_references', topicReferenceSchema);
+module.exports = mongoose.model('LmsReference', topicReferenceSchema, 'lms_references');

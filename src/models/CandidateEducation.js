@@ -18,12 +18,12 @@ const candidateEducation = new mongoose.Schema({
         candidateId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "candidates",
+            ref: "Candidate",
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true }
@@ -31,4 +31,4 @@ const candidateEducation = new mongoose.Schema({
 
 candidateEducation.plugin(mongoosePaginate);
 candidateEducation.plugin(aggregatePaginate);
-module.exports = mongoose.model('candidate_education', candidateEducation);
+module.exports = mongoose.model('CandidateEducation', candidateEducation, 'candidate_educations');

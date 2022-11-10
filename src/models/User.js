@@ -35,7 +35,7 @@ const isCandidate = new mongoose.Schema({
     },
     candidateId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "candidates",
+        ref: "Candidate",
     }
 })
 
@@ -93,8 +93,7 @@ const UserSchema = new mongoose.Schema(
         userConfig,
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
-            ref: "institutions",
+            ref: "Institution",
         },
     },
     { timestamps: true }
@@ -158,4 +157,4 @@ UserSchema.set("toJSON", { virtuals: true }); */
 
 UserSchema.plugin(mongoosePaginate);
 UserSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('users', UserSchema);
+module.exports = mongoose.model('User', UserSchema, 'users');

@@ -19,4 +19,4 @@ const SmsLogSchema = new mongoose.Schema(
 );
 SmsLogSchema.plugin(mongoosePaginate);
 SmsLogSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model("sms_logs", SmsLogSchema);
+module.exports = mongoose.model("SmsLog", SmsLogSchema, 'sms_logs');

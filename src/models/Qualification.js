@@ -10,4 +10,4 @@ const qualificationSchema = new mongoose.Schema({
     }
 );
 
-module.exports = mongoose.model('modules', qualificationSchema);
+module.exports = mongoose.model('Qualification', qualificationSchema, 'qualifications');

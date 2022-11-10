@@ -60,12 +60,12 @@ const CandidateBioDataSchema = new mongoose.Schema(
         candidateId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "candidates",
+            ref: "Candidate",
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true }
@@ -73,4 +73,4 @@ const CandidateBioDataSchema = new mongoose.Schema(
 
 CandidateBioDataSchema.plugin(mongoosePaginate);
 CandidateBioDataSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('candidate_bio_data', CandidateBioDataSchema);
+module.exports = mongoose.model('CandidateBioData', CandidateBioDataSchema, 'candidate_bio_data');

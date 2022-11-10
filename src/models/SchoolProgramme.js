@@ -10,4 +10,4 @@ const programmeSchema = new mongoose.Schema({
     }
 );
 
-module.exports = mongoose.model('programmes', programmeSchema);
+module.exports = mongoose.model('SchoolProgramme', programmeSchema, 'school_programmes');

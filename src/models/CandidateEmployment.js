@@ -15,12 +15,12 @@ const candidateEmployment = new mongoose.Schema({
         candidateId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "candidates",
+            ref: "Candidate",
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true }
@@ -28,4 +28,4 @@ const candidateEmployment = new mongoose.Schema({
 
 candidateEmployment.plugin(mongoosePaginate);
 candidateEmployment.plugin(aggregatePaginate);
-module.exports = mongoose.model('candidate_employment', candidateEmployment);
+module.exports = mongoose.model('CandidateEmployment', candidateEmployment, 'candidate_employments');

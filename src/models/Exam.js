@@ -42,12 +42,12 @@ const examSchema = new mongoose.Schema({
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institutions",
+            ref: "Institution",
         },
         config,
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true }
@@ -57,4 +57,4 @@ examSchema.index({ "code": 1, "institutionId": 1}, { "unique": true });
 
 examSchema.plugin(mongoosePaginate);
 examSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('exams', examSchema);
+module.exports = mongoose.model('Exam', examSchema, 'exams');

@@ -7,23 +7,23 @@ const examSubjectSchema = new mongoose.Schema({
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institutions",
+            ref: "Institution",
         },
         examId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "exams",
+            ref: "Exam",
         },
         subjectId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institution_subjects",
+            ref: "InstitutionSubject",
         },
         subjectMark: Number,
         subjectNumberOfQuestions: Number,
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true }
@@ -32,4 +32,4 @@ examSubjectSchema.index({ "examId": 1, "subjectId": 1}, { "unique": true });
 
 examSubjectSchema.plugin(mongoosePaginate);
 examSubjectSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('exam_subjects', examSubjectSchema);
+module.exports = mongoose.model('ExamSubject', examSubjectSchema, 'exam_subjects');

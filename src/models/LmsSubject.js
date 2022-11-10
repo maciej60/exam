@@ -13,9 +13,9 @@ const lmsSubjectSchema = new mongoose.Schema({
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true });
 
-module.exports = mongoose.model('lms_subjects', lmsSubjectSchema);
+module.exports = mongoose.model('LmsSubject', lmsSubjectSchema, 'lms_subjects');

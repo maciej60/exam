@@ -6,27 +6,27 @@ const subTopicSchema = new mongoose.Schema({
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institutions",
+            ref: "Institution",
         },
         subjectId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institution_subjects",
+            ref: "InstitutionSubject",
         },
         topicId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "institution_subject_topics",
+            ref: "InstitutionSubjectTopic",
         },
         tags: Array,
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true });
 
 subTopicSchema.index({ "name": 1, "topicId": 1}, { "unique": true });
 subTopicSchema.index({ "code": 1, "topicId": 1}, { "unique": true });
-module.exports = mongoose.model('institution_sub_topics', subTopicSchema);
+module.exports = mongoose.model('InstitutionSubTopic', subTopicSchema, 'institution_sub_topics');

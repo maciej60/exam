@@ -13,16 +13,16 @@ const candidateNextOfKin = new mongoose.Schema({
         candidateId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "candidates",
+            ref: "Candidate",
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "users",
+            ref: "User",
         },
     },
     { timestamps: true })
 
 candidateNextOfKin.plugin(mongoosePaginate);
 candidateNextOfKin.plugin(aggregatePaginate);
-module.exports = mongoose.model('candidate_next_of_kin', candidateNextOfKin);
+module.exports = mongoose.model('CandidateNextOfKin', candidateNextOfKin, 'candidate_next_of_kins');
