@@ -8,58 +8,13 @@ const { parseInt } = require("lodash");
 const time = new Date(Date.now()).toLocaleString();
 
 /**
- * @desc taxPayersFromRevotax
- * @route POST /api/v2/user/taxPayersFromRevotax
- * @access PUBLIC
- *  @params apikey, ip, receipt_no
- */
-exports.taxPayersFromRevotax = asyncHandler(async (req, res, next) => {
-  try {
-    let ip = req.socket.remoteAddress;
-    let { data } = req.body;
-    const createResponse = (data) => {
-      return res.status(200).json({
-        status: data.status,
-        code: "00",
-        data: {
-          success: data.successful,
-          failed: data.failed,
-        },
-        message: data.message,
-      });
-    }
-    if(!data || !data.length) {
-      return next(
-        new ErrorResponse(
-          `Please provide data!`,
-          200,
-          "E301"
-        )
-      );
-    }
-    await helper.UserHelper.createTaxPayerFromRevotax(
-      data,
-      createResponse
-    );
-  } catch (error) {
-    return next(
-      new ErrorResponse(
-        `TaxpayerFromRevotax failed with error ${error.message}`,
-        500,
-        error.errorCode
-      )
-    );
-  }
-});
-
-/**
  * @desc Users
  * @route POST /api/v2/user/add
  * @access PUBLIC
  */
 exports.add = asyncHandler(async (req, res, next) => {
   try {
-    let createdBy = req.user.id;
+    let createdBy = req.user.id || null;
     let { phone, email, lastName, firstName, middleName, taxId } =
       req.body;
     const ObjectId = require("mongoose").Types.ObjectId;
