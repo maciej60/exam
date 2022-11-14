@@ -63,15 +63,9 @@ exports.login = asyncHandler(async (req, res, next) => {
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   try {
-    /**
-     * initialize key variables
-     */
-    let currMonthYear = await utils.getDateElemsText(Date.now());
-    currMonthYear = currMonthYear.month + ", " + currMonthYear.year;
-    const currDayMonthYear = await utils.currDayMonthYear();
 
     /**
-     * build contraints for validate.js
+     * build constraints for validate.js
      */
     const constraints = {
       login: {
@@ -104,10 +98,10 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
       /**
        * validation fails
        */
-      logger.filecheck(
-        `ERROR(E11): Forgot password failed , at ${time} with error ${
-          Object.values(validation)[0]
-        } \n`
+      await logger.filecheck(
+          `ERROR(E11): Forgot password failed , at ${time} with error ${
+              Object.values(validation)[0]
+          } \n`
       );
       return next(
         new ErrorResponse(`${Object.values(validation)[0]}`, 200, "E300")
@@ -124,9 +118,6 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         isPhone = true;
       }
     }
-    /* const check_user = await helper.UserHelper.getUser({
-      $or: [{ email: login }, { phone: login }],
-    });  */ 
     if (!check_user) {
       return next(
         new ErrorResponse("Email/Phone do not exist!", 200, "e404")
@@ -134,8 +125,11 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     }
     let sender;
     let user_id = check_user._id;
-    let url = reset_url + "?e0789Code=" + user_id;
+    let url = reset_url + "?e0779Binary=" + user_id;
     let success = 0;
+    /**
+     * begin send sms
+     */
     if(isPhone){
       phone = login;
       console.log(`*** begin sms sending ***`);
@@ -165,16 +159,19 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
       );
       console.log(`*** smslog added ***`);
     }
+    /**
+     * begin send email
+     */
     if (isEmail) {
-      email = login;
+      let email = login;
       console.log(`*** begin email sending ***`);
       let subject = "Password Reset";
       let emailParams = {
         heading: `Forgot Password`,
         previewText:
-          "RRS is a revenue reward scheme designed to appreciate tax-payers and make revenue collection a bit fun!",
+          "Tiwo Exam Portal is awesome!",
         message:
-          "Revenue reward scheme (RRS) is a program designed to reward tax payers. At every month-end, a draw is made where the lucky tax-payers are provided with a reward.",
+          "This exam portal is designed to help institutions conduct quiz.",
         url: url,
         url_text: reset_url,
       };
@@ -188,7 +185,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
       if (sender.response.Code == "02") {
         success = 1;
       }
-      email_log_data = {
+      let email_log_data = {
         email,
         requestData: sender.request,
         responseData: sender.response,
@@ -224,21 +221,15 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   try {
-    /**
-     * initialize key variables
-     */
-    let currMonthYear = await utils.getDateElemsText(Date.now());
-    currMonthYear = currMonthYear.month + ", " + currMonthYear.year;
-    const currDayMonthYear = await utils.currDayMonthYear();
 
     /**
-     * build contraints for validate.js
+     * build constraints for validate.js
      */
     const constraints = {
       password: {
         presence: {
           allowEmpty: false,
-          message: "Password is required",
+          message: "is required",
         },
         length: {
           minimum: 8,
@@ -266,10 +257,10 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
       /**
        * validation fails
        */
-      logger.filecheck(
-        `ERROR(E11): Reset password failed , at ${time} with error ${
-          Object.values(validation)[0]
-        } \n`
+      await logger.filecheck(
+          `ERROR(E11): Reset password failed , at ${time} with error ${
+              Object.values(validation)[0]
+          } \n`
       );
       return next(
         new ErrorResponse(`${Object.values(validation)[0]}`, 200, "E300")
@@ -309,18 +300,20 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
       new_password: password
     });
 
+    /**
+     * begin email send
+     */
     let email = check_user.email;
     let success = 0;
     let subject = "Password Reset";
     let emailParams = {
       heading: `Password Reset Successful`,
       previewText:
-        "RRS is a revenue reward scheme designed to appreciate tax-payers and make revenue collection a bit fun!",
+        "Exam portal is good!",
       message:
         "Your password is successfully reset, kindly login and proceed.",
     };
     let template = emailTemplate.resetPassword(emailParams);
-
     let p = {
       to: email,
       message: template,
@@ -331,7 +324,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
       success = 1;
     }
     console.log(`*** email sent ***`);
-    email_log_data = {
+    let email_log_data = {
       email,
       requestData: send_email.request,
       responseData: send_email.response,
@@ -367,21 +360,15 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 
 exports.changePassword = asyncHandler(async (req, res, next) => {
   try {
-    /**
-     * initialize key variables
-     */
-    let currMonthYear = await utils.getDateElemsText(Date.now());
-    currMonthYear = currMonthYear.month + ", " + currMonthYear.year;
-    const currDayMonthYear = await utils.currDayMonthYear();
 
     /**
-     * build contraints for validate.js
+     * build constraints for validate.js
      */
     const constraints = {
       password: {
         presence: {
           allowEmpty: false,
-          message: "Password is required",
+          message: "is required",
         },
         length: {
           minimum: 8,
@@ -409,10 +396,10 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
       /**
        * validation fails
        */
-      logger.filecheck(
-        `ERROR(E11): Change password failed , at ${time} with error ${
-          Object.values(validation)[0]
-        } \n`
+      await logger.filecheck(
+          `ERROR(E11): Change password failed , at ${time} with error ${
+              Object.values(validation)[0]
+          } \n`
       );
       return next(
         new ErrorResponse(`${Object.values(validation)[0]}`, 200, "E300")
@@ -461,10 +448,10 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
     let emailParams = {
       heading: `Change Password Successful`,
       previewText:
-        "RRS is a revenue reward scheme designed to appreciate tax-payers and make revenue collection a bit fun!",
+        "Exam portal is good!",
       message: "Your password is successfully changed, kindly login and proceed.",
     };
-    let template = emailTemplate.resetPassword(emailParams);
+    let template = emailTemplate.changePassword(emailParams);
 
     let p = {
       to: email,
@@ -476,7 +463,7 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
       success = 1;
     }
     console.log(`*** email sent ***`);
-    email_log_data = {
+    let email_log_data = {
       email,
       requestData: send_email.request,
       responseData: send_email.response,

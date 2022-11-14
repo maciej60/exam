@@ -75,7 +75,7 @@ module.exports = {
         },
       },
     ]).addFields({
-      userTypeText: {
+      /*userTypeText: {
         $function: {
           body: function (userType) {
             return userType == 1 ? "Individual" : "Company";
@@ -83,7 +83,7 @@ module.exports = {
           args: ["$userType"],
           lang: "js",
         },
-      },
+      },*/
       isAdminText: {
         $function: {
           body: function (isAdmin) {

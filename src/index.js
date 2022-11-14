@@ -51,10 +51,10 @@ app.post("/", (req, res) => {
   });
 });
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, { explorer: true }));
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, { explorer: true }));
 app.use("/api/v2/auth", auth);
 app.use("/api/v2/user", user);
-app.use("/api/v2/admin", user);
+// app.use("/api/v2/candidate", candidate);
 app.use("/api/v2/communication", communication);
 app.use("/api/v2/test", test);
 

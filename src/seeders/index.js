@@ -5,6 +5,7 @@ require("dotenv").config();
 const utils = require("../utils");
 const logger = require("../utils/logger");
 let appRoot = require("app-root-path");
+const generator = require("generate-password");
 let normalizedPath = appRoot + "/src/models/";
 
 console.log('seeding started...');
@@ -36,6 +37,8 @@ console.log('seeding started...');
         modelFileNameArray
       )} \n`
     );
+
+    let pw_hashed = await utils.hashPassword("Password12@");
 
     /**
      * drop db and remove sticky constraints and unnecessary unique keys
@@ -76,7 +79,9 @@ console.log('seeding started...');
             phone: "08068535539",
             isAdmin: 1,
             status: 1,
-            firstLogin: 2
+            firstLogin: 2,
+            password: pw_hashed,
+            passwordResets: [pw_hashed]
           },
         ],
       },

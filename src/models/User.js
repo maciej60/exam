@@ -89,6 +89,10 @@ const UserSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        isInstitutionManager: {
+            type: Number,
+            default: 0,
+        },
         passwordResets: Array,
         userConfig,
         institutionId: {
@@ -116,10 +120,9 @@ UserSchema.pre("save", function (next) {
             lowercase: true,
             symbols: true,
         });
-        let pw_hashed = utils.hashPassword(pw);
-        this.password = pw_hashed;
-        this.passwordResets.push(pw_hashed);
+        this.password = utils.hashPassword(pw);
     }
+    if(this.password) this.passwordResets.push(this.password);
     this.firstName =
         !_.isEmpty(this.firstName) && this.firstName != null
             ? this.firstName.toUpperCase()
@@ -132,6 +135,7 @@ UserSchema.pre("save", function (next) {
         !_.isEmpty(this.middleName) && this.middleName != null
             ? this.middleName.toUpperCase()
             : "";
+    this.userName = this.lastName.toLowerCase() + "." + this.firstName.toLowerCase();
     next();
 });
 
@@ -143,9 +147,10 @@ UserSchema.pre("updateOne", function () {
     this.set({ firstName: this._update.$set.firstName.toUpperCase() });
     this.set({ lastName: this._update.$set.lastName.toUpperCase() });
     this.set({ middleName: this._update.$set.middleName.toUpperCase() });
+    this.set({ userName: this._update.$set.firstName.toUpperCase() });
     this.set({ email: this._update.$set.email.toLowerCase() });
-    let u = "";
-    this.set({ userName: u.toUpperCase() });
+    let u = this._update.$set.lastName + "." + this._update.$set.firstName;
+    this.set({ userName: u.toLowerCase() });
 });
 
 /* UserSchema.virtual("userName").get(function () {
