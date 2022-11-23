@@ -5,20 +5,8 @@ const _ = require("lodash");
 const generator = require("generate-password");
 const utils = require("../utils");
 
-const isUser = new mongoose.Schema({
-    yes: {
-        type: Number,
-        default: 0,
-    },
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "users",
-    }
-});
-
 const oSchema = new mongoose.Schema(
     {
-        isUser,
         title: String,
         firstName: {
             type: String,
@@ -48,12 +36,15 @@ const oSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-        password: {
-            type: String,
-        },
         candidateType: {
-            type: String,
-            default: 'Employee',
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "CandidateType",
+        },
+        institutionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "Institution",
         },
         gender: {
             type: String,
@@ -72,12 +63,10 @@ const oSchema = new mongoose.Schema(
             type: Number,
             default: 1,
         },
-        passwordResets: Array,
-        institutionId: {
-            type: mongoose.Schema.Types.ObjectId,
-            required: true,
-            ref: "institutions",
+        password: {
+            type: String,
         },
+        passwordResets: Array,
     },
     { timestamps: true }
 );
