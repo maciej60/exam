@@ -3,7 +3,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const _ = require("lodash");
 
-const candidateBank = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
     accountName: String,
     accountNumber: String,
     grade: String,
@@ -24,6 +24,6 @@ const candidateBank = new mongoose.Schema({
     { timestamps: true }
 );
 
-candidateBank.plugin(mongoosePaginate);
-candidateBank.plugin(aggregatePaginate);
-module.exports = mongoose.model('CandidateBank', candidateBank, 'candidate_banks');
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('CandidateBank', oSchema, 'candidate_banks');

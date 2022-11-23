@@ -3,7 +3,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const _ = require("lodash");
 
-const candidateNextOfKin = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         name: String,
         address: Date,
         phone: String,
@@ -23,6 +23,6 @@ const candidateNextOfKin = new mongoose.Schema({
     },
     { timestamps: true })
 
-candidateNextOfKin.plugin(mongoosePaginate);
-candidateNextOfKin.plugin(aggregatePaginate);
-module.exports = mongoose.model('CandidateNextOfKin', candidateNextOfKin, 'candidate_next_of_kins');
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('CandidateNextOfKin', oSchema, 'candidate_next_of_kins');

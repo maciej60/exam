@@ -1,0 +1,308 @@
+const ErrorResponse = require("../utils/errorResponse");
+const asyncHandler = require("../middleware/async");
+const utils = require("../utils");
+const helper = require("../utils/model_helpers");
+const _ = require("lodash");
+const logger = require("../utils/logger");
+const { parseInt } = require("lodash");
+const time = new Date(Date.now()).toLocaleString();
+const Joi = require("joi");
+const communication = require("./communication");
+const next = require("locutus/php/array/next");
+const generator = require("generate-password");
+require("dotenv").config();
+let appRoot = require("app-root-path");
+let emailTemplate = require(`${appRoot}/src/utils/emailTemplate`);
+
+
+/**
+ * @desc Question
+ * @route POST /api/v1/question/add
+ * @access PUBLIC
+ */
+exports.add = asyncHandler(async (req, res, next) => {
+    let validationSchema;
+    try {
+        /**
+         * validate request body
+         * @type {Joi.ObjectSchema<any>}
+         */
+        validationSchema = Joi.object({
+            institutionId: Joi.string().required(),
+            subjectId: Joi.string().required(),
+            topicId: Joi.string().required(),
+            subTopicId: Joi.string().required(),
+            questionTypeId: Joi.string().required(),
+            question: Joi.string().required(),
+            options: Joi.any(),
+            answer: Joi.any(),
+        });
+        const { error } = validationSchema.validate(req.body);
+        if (error)
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg: `Question create validation failed with error: ${error.details[0].message}`,
+                errorCode: "E401",
+                statusCode: 200,
+            });
+        let createdBy = req.user.id || null;
+        let {
+            institutionId,
+            subjectId,
+            topicId,
+            subTopicId,
+            questionTypeId,
+            question,
+            options,
+            answer,
+        } = req.body;
+        const ObjectId = require("mongoose").Types.ObjectId;
+        let questionContainer = {
+            institutionId,
+            subjectId,
+            topicId,
+            subTopicId,
+            questionTypeId,
+            question,
+            options,
+            answer,
+            createdBy
+        };
+        const create = await helper.QuestionHelper.createQuestion(questionContainer);
+        await logger.filecheck(
+            `INFO: Question, created at ${time} by ${createdBy} with data ${JSON.stringify(
+                create
+            )} \n`
+        );
+        return utils.send_json_response({
+            res,
+            data: create,
+            msg: `Question successfully created .`,
+        });
+    } catch (error) {
+        return utils.send_json_error_response({
+            res,
+            data: [],
+            msg: `Question create failed with error ${error.message}`,
+            errorCode: error.errorCode,
+            statusCode: 200,
+        });
+    }
+});
+
+/**
+ * @desc Question
+ * @route GET /api/v1/question/list
+ * @access Application
+ */
+exports.list = asyncHandler(async (req, res, next) => {
+    try {
+        /**
+         * build query options for mongoose-paginate
+         */
+        const queryOptions = await utils.buildQueryOptions(req.query);
+        if (typeof queryOptions === "string") {
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg: `${queryOptions} is not valid!`,
+                errorCode: "E501",
+                statusCode: 200,
+            });
+        }
+        /**
+         * fetch paginated data using queryOptions
+         */
+        const ObjectId = require("mongoose").Types.ObjectId;
+        let where = {};
+        if (!_.isEmpty(req.body.question) && req.body.question) {
+            where.question = {
+                $regex: ".*" + req.body.question + ".*",
+                $options: "i",
+            };
+        }
+        if (!_.isEmpty(req.body.institutionId) && req.body.institutionId) {
+            where.institutionId = new ObjectId(req.body.institutionId);
+        }
+        if (!_.isEmpty(req.body.subjectId) && req.body.subjectId) {
+            where.subjectId = new ObjectId(req.body.subjectId);
+        }
+        if (!_.isEmpty(req.body.topicId) && req.body.topicId) {
+            where.topicId = new ObjectId(req.body.topicId);
+        }
+        if (!_.isEmpty(req.body.subTopicId) && req.body.subTopicId) {
+            where.subTopicId = new ObjectId(req.body.subTopicId);
+        }
+        if (!_.isEmpty(req.body.questionTypeId) && req.body.questionTypeId) {
+            where.questionTypeId = new ObjectId(req.body.questionTypeId);
+        }
+        const objWithoutMeta = await helper.QuestionHelper.getQuestions({
+            where,
+            queryOptions,
+        });
+        if (objWithoutMeta.data && !_.isEmpty(objWithoutMeta.data)) {
+            /**
+             * build response data meta for pagination
+             */
+            let url = req.protocol + "://" + req.get("host") + req.originalUrl;
+            const obj = await utils.buildResponseMeta({ url, obj: objWithoutMeta });
+            await logger.filecheck(
+                `INFO: Question list by:, at ${time} with data ${JSON.stringify(
+                    obj
+                )} \n`
+            );
+            return utils.send_json_response({
+                res,
+                data: obj,
+                msg: `Question list successfully fetched`,
+            });
+        } else {
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg: `No record!`,
+                errorCode: "E404",
+                statusCode: 200,
+            });
+        }
+    } catch (error) {
+        return utils.send_json_error_response({
+            res,
+            data: [],
+            msg: `Question list failed with error ${error.message}`,
+            errorCode: error.errorCode,
+            statusCode: 200,
+        });
+    }
+});
+
+/**
+ * @desc Question
+ * @route POST /api/v1/question/update
+ * @access PUBLIC
+ */
+exports.update = asyncHandler(async (req, res) => {
+    //let createdBy = req.user.id;
+    let validationSchema;
+    try {
+        validationSchema = Joi.object({
+            institutionId: Joi.string(),
+            subjectId: Joi.string(),
+            topicId: Joi.string(),
+            subTopicId: Joi.string(),
+            questionTypeId: Joi.string(),
+            question: Joi.string(),
+            options: Joi.any(),
+            answer: Joi.any(),
+            id: Joi.string().required(),
+        });
+        const { error } = validationSchema.validate(req.body);
+        if (error)
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg: `Question update validation failed with error: ${error.details[0].message}`,
+                errorCode: "E401",
+                statusCode: 200,
+            });
+        const {
+            institutionId,
+            subjectId,
+            topicId,
+            subTopicId,
+            questionTypeId,
+            question,
+            options,
+            answer,
+            id,
+        } = req.body;
+        const data = {
+            institutionId,
+            subjectId,
+            topicId,
+            subTopicId,
+            questionTypeId,
+            question,
+            options,
+            answer,
+        };
+        const ObjectId = require("mongoose").Types.ObjectId;
+        const update = await helper.QuestionHelper.findUpdate({
+            filter: {
+                _id: new ObjectId(id),
+            },
+            update: {
+                $set: data,
+            },
+            options: { upsert: true, new: true },
+        });
+        if (!update.result)
+            return utils.send_json_error_response({
+                res,
+                data: update.result,
+                msg: update.message,
+                errorCode: "E401",
+            });
+        return utils.send_json_response({
+            res,
+            data: update.result,
+        });
+    } catch (error) {
+        return utils.send_json_error_response({
+            res,
+            data: [],
+            msg: `Error: ${error} `,
+            errorCode: error.errorCode,
+            statusCode: 200,
+        });
+    }
+});
+
+/**
+ * @desc Question
+ * @route POST /api/v1/question/remove
+ * @access PUBLIC
+ */
+exports.remove = asyncHandler(async (req, res, next) => {
+    try {
+        let deletedBy = req.user.id;
+        let { ids } = req.body;
+        let model = "QuestionBank";
+        const ObjectId = require("mongoose").Types.ObjectId;
+        ids.map((d) => new ObjectId(d));
+        let del = await helper.backupAndDelete({
+            ids,
+            deletedBy,
+            model,
+        });
+        if(del.deletedCount >= 1){
+            await logger.filecheck(
+                `INFO: Question deleted: by ${deletedBy} at ${time} with data ${JSON.stringify(
+                    del
+                )} \n`
+            );
+            return utils.send_json_response({
+                res,
+                data: del,
+                msg: `Question successfully deleted`,
+            });
+        }else{
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg: `Question delete failed`,
+                errorCode: "E501",
+                statusCode: 200
+            });
+        }
+    } catch (error) {
+        return utils.send_json_error_response({
+            res,
+            data: [],
+            msg: `Question delete failed with error ${error.message}`,
+            errorCode: error.errorCode,
+            statusCode: 200,
+        });
+    }
+});

@@ -3,7 +3,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const _ = require("lodash");
 
-const questionBankSchema = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
@@ -24,7 +24,10 @@ const questionBankSchema = new mongoose.Schema({
             required: true,
             ref: "InstitutionSubTopic",
         },
-        questionType: String,
+        questionType: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "QuestionType",
+        },
         question: String,
         options: Array,
         answer: {
@@ -37,8 +40,8 @@ const questionBankSchema = new mongoose.Schema({
     },
     { timestamps: true }
 );
-questionBankSchema.index({ "subTopicId": 1, "question": 1}, { "unique": true });
+oSchema.index({ "subTopicId": 1, "question": 1}, { "unique": true });
 
-questionBankSchema.plugin(mongoosePaginate);
-questionBankSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('QuestionBank', questionBankSchema, 'question_bank');
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('QuestionBank', oSchema, 'question_bank');

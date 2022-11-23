@@ -3,7 +3,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const _ = require("lodash");
 
-const examSubjectSchema = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
@@ -28,8 +28,8 @@ const examSubjectSchema = new mongoose.Schema({
     },
     { timestamps: true }
 );
-examSubjectSchema.index({ "examId": 1, "subjectId": 1}, { "unique": true });
+oSchema.index({ "examId": 1, "subjectId": 1}, { "unique": true });
 
-examSubjectSchema.plugin(mongoosePaginate);
-examSubjectSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('ExamSubject', examSubjectSchema, 'exam_subjects');
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('ExamSubject', oSchema, 'exam_subjects');

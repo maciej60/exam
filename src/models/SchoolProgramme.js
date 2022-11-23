@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const programmeSchema = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         name: {
             type: String,
             trim: true,
@@ -10,4 +10,4 @@ const programmeSchema = new mongoose.Schema({
     }
 );
 
-module.exports = mongoose.model('SchoolProgramme', programmeSchema, 'school_programmes');
+module.exports = mongoose.model('SchoolProgramme', oSchema, 'school_programmes');

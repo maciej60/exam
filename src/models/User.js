@@ -5,46 +5,6 @@ const _ = require("lodash");
 const generator = require("generate-password");
 const utils = require("../utils");
 
-const examConfig = new mongoose.Schema({
-    examCode: String,
-    canReview: {
-        type: Number,
-        default: 0,
-    },
-    canCreate: {
-        type: Number,
-        default: 0,
-    }
-});
-
-const applicationConfig = new mongoose.Schema({
-    canDelete: {
-        type: Number,
-        default: 0,
-    },
-    canReview: {
-        type: Number,
-        default: 0,
-    },
-})
-
-const isCandidate = new mongoose.Schema({
-    yes: {
-        type: Number,
-        default: 0,
-    },
-    candidateId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Candidate",
-    }
-})
-
-const userConfig = new mongoose.Schema({
-    examConfig: [examConfig],
-    applicationConfig,
-    isCandidate
-});
-
 const UserSchema = new mongoose.Schema(
     {
         firstName: {
@@ -81,20 +41,28 @@ const UserSchema = new mongoose.Schema(
             default: 1,
             enum: [0, 1, 2],
         },
+        userPermission: Array,
         status: {
             type: Number,
             default: 1,
         },
-        isAdmin: {
+        isSystemAdmin: {
             type: Number,
             default: 0,
         },
-        isInstitutionManager: {
+        isInstitutionAdmin: {
+            type: Number,
+            default: 0,
+        },
+        isLmsAdmin: {
             type: Number,
             default: 0,
         },
         passwordResets: Array,
-        userConfig,
+        candidateId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Candidate",
+        },
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Institution",

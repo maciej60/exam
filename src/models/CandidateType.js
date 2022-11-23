@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-const candidateTypeSchema = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         name: String,
     }
 );
 
-module.exports = mongoose.model('CandidateType', candidateTypeSchema, 'candidate_types');
+module.exports = mongoose.model('CandidateType', oSchema, 'candidate_types');

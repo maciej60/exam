@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const DeletedDataSchema = new mongoose.Schema(
+const oSchema = new mongoose.Schema(
   {
     deletedModel: {
       type: String,
@@ -16,4 +16,4 @@ const DeletedDataSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("DeletedData", DeletedDataSchema, 'deleted_data');
+module.exports = mongoose.model("DeletedData", oSchema, 'deleted_data');

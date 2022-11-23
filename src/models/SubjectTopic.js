@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
-const institutionSubjectTopicSchema = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         name: String,
-        code: String,
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
@@ -11,7 +12,7 @@ const institutionSubjectTopicSchema = new mongoose.Schema({
         subjectId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "InstitutionSubject",
+            ref: "Subject",
         },
         status: {
             type: Number,
@@ -25,6 +26,8 @@ const institutionSubjectTopicSchema = new mongoose.Schema({
     },
     { timestamps: true });
 
-institutionSubjectTopicSchema.index({ "name": 1, "subjectId": 1}, { "unique": true });
-institutionSubjectTopicSchema.index({ "code": 1, "subjectId": 1}, { "unique": true });
-module.exports = mongoose.model('InstitutionSubjectTopic', institutionSubjectTopicSchema, 'institution_subject_topics');
+oSchema.index({ "name": 1, "subjectId": 1}, { "unique": true });
+
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('SubjectTopic', oSchema, 'subject_topics');

@@ -1,12 +1,13 @@
 const router = require("express").Router();
 const {
-  users,
-  add
+  listUsers,
+  addUser,
+  updateUser
 } = require("../controllers/user");
-const { protect, guardExternalRequests } = require("../middleware/auth");
+const { protect } = require("../middleware/auth");
 
-router.post("/add", protect, add);
-
-router.get("/users", protect, users);
+router.post("/add", protect, addUser);
+router.post("/update", protect, updateUser);
+router.post("/list", protect, listUsers);
 
 module.exports = router;

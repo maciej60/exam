@@ -3,7 +3,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const _ = require("lodash");
 
-const candidateSchool = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         schoolRegistrationNumber: String,
         jambRegistrationNumber: String,
         school: String,
@@ -28,6 +28,6 @@ const candidateSchool = new mongoose.Schema({
     { timestamps: true }
 );
 
-candidateSchool.plugin(mongoosePaginate);
-candidateSchool.plugin(aggregatePaginate);
-module.exports = mongoose.model('CandidateSchool', candidateSchool, 'candidate_schools');
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('CandidateSchool', oSchema, 'candidate_schools');

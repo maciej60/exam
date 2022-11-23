@@ -1212,13 +1212,13 @@ exports.newUser = (params) => {
        Password: ${params.password}
         </p>
         <br><hr><br>
-        <p style="text-align: center;">Receipt Number: ${params.receiptNumber}</p>
+        <p style="text-align: center;">Institution : ${params.institutionName}</p>
       </div>
     </div>
     <div class="column__padding--inline">
       <div class="btn btn--flat btn--large" style="text-align:center;">
         <a cs-button href="#" fix-pos data-vml-width="138" height="48" style="color: blue !important; font-family: Georgia, serif; border-radius: 4px;">
-        RRS CODE: ${params.rrsCode}</a>
+        Institution Cod: ${params.institutionCode}</a>
       </div>
     </div>
  ${emailFooter} `;

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const institutionUnitSchema = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         name: String,
         code: String,
         institutionId: {
@@ -11,12 +11,12 @@ const institutionUnitSchema = new mongoose.Schema({
         ministryId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "InstitutionMinistry",
+            ref: "Ministry",
         },
         departmentId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "InstitutionDepartment",
+            ref: "Department",
         },
         status: {
             type: Number,
@@ -29,7 +29,7 @@ const institutionUnitSchema = new mongoose.Schema({
         },
     },
     { timestamps: true });
-institutionUnitSchema.index({ "name": 1, "departmentId": 1}, { "unique": true });
-institutionUnitSchema.index({ "code": 1, "departmentId": 1}, { "unique": true });
+oSchema.index({ "name": 1, "departmentId": 1}, { "unique": true });
+oSchema.index({ "code": 1, "departmentId": 1}, { "unique": true });
 
-module.exports = mongoose.model('InstitutionUnit', institutionUnitSchema, 'institution_units');
+module.exports = mongoose.model('Unit', oSchema, 'units');

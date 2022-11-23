@@ -21,9 +21,15 @@ connectDB();
 // file upload
 app.use(fileupload());
 
-// Route files
+// Route files,
 const auth = require("./routes/auth");
+const menu = require("./routes/menu");
 const user = require("./routes/user");
+const admin = require("./routes/admin");
+const institution = require("./routes/institution");
+const application = require("./routes/application");
+const subject = require("./routes/subject");
+const question = require("./routes/question");
 const communication = require("./routes/communication");
 const test = require("./routes/test");
 const { protect } = require("./middleware/auth");
@@ -53,7 +59,13 @@ app.post("/", (req, res) => {
 
 // app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, { explorer: true }));
 app.use("/api/v2/auth", auth);
+app.use("/api/v2/menu", menu);
 app.use("/api/v2/user", user);
+app.use("/api/v2/admin", admin);
+app.use("/api/v2/institution", institution);
+app.use("/api/v2/application", application);
+app.use("/api/v2/subject", subject);
+app.use("/api/v2/question", question);
 // app.use("/api/v2/candidate", candidate);
 app.use("/api/v2/communication", communication);
 app.use("/api/v2/test", test);

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const gradeSchema = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         name: {
             type: String,
             trim: true,
@@ -10,4 +10,4 @@ const gradeSchema = new mongoose.Schema({
     }
 );
 
-module.exports = mongoose.model('Grade', gradeSchema, 'grades');
+module.exports = mongoose.model('Grade', oSchema, 'grades');

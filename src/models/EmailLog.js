@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
-const mongoosePaginate = require("mongoose-paginate-v2");
-let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
-const EmailLogSchema = new mongoose.Schema(
+const oSchema = new mongoose.Schema(
   {
     email: {
       type: String,
@@ -17,6 +15,4 @@ const EmailLogSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-EmailLogSchema.plugin(mongoosePaginate);
-EmailLogSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model("EmailLog", EmailLogSchema, 'email_logs');
+module.exports = mongoose.model("EmailLog", oSchema, 'email_logs');

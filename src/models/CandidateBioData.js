@@ -3,7 +3,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const _ = require("lodash");
 
-const CandidateBioDataSchema = new mongoose.Schema(
+const oSchema = new mongoose.Schema(
     {
         homeState: {
             type: String,
@@ -71,6 +71,6 @@ const CandidateBioDataSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-CandidateBioDataSchema.plugin(mongoosePaginate);
-CandidateBioDataSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('CandidateBioData', CandidateBioDataSchema, 'candidate_bio_data');
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('CandidateBioData', oSchema, 'candidate_bio_data');

@@ -3,7 +3,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const _ = require("lodash");
 
-const institutionConfig = new mongoose.Schema({
+/*const institutionConfig = new mongoose.Schema({
     enable2wa: {
         type: Number,
         default: 0
@@ -12,9 +12,9 @@ const institutionConfig = new mongoose.Schema({
         type: Number,
         default: 0
     },
-})
+})*/
 
-const InstitutionSchema = new mongoose.Schema(
+const oSchema = new mongoose.Schema(
     {
         name: {
             type: String,
@@ -42,17 +42,26 @@ const InstitutionSchema = new mongoose.Schema(
             unique: true
         },
         logo: String,
-        institutionConfig,
+        institutionConfig: {
+            enable2wa: {
+                type: Number,
+                default: 0
+            },
+            anyCanReview: {
+                type: Number,
+                default: 0
+            },
+        },
         businessId: {
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
             ref: "Business",
         },
         modules: Array,
     },
     { timestamps: true }
 );
-InstitutionSchema.pre("save", function (next) {
+/*oSchema.index({ "email": 1, "businessId": 1}, { "unique": true });*/
+oSchema.pre("save", function (next) {
     /**
      * if password is not provided, put this bcrypt code for 'password'
      */
@@ -67,7 +76,7 @@ InstitutionSchema.pre("save", function (next) {
     next();
 });
 
-InstitutionSchema.pre("updateOne", function () {
+oSchema.pre("updateOne", function () {
     /**
      * here we have access to the query object not the data object because mongoose will query the doc before updating
      * so u can only modify the query object so as to fetch the correct data for the update
@@ -76,6 +85,6 @@ InstitutionSchema.pre("updateOne", function () {
     this.set({ email: this._update.$set.email.toLowerCase() });
 });
 
-InstitutionSchema.plugin(mongoosePaginate);
-InstitutionSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('Institution', InstitutionSchema, 'institutions');
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('Institution', oSchema, 'institutions');

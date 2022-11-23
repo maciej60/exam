@@ -71,13 +71,30 @@ console.log('seeding started...');
         model: "User",
         documents: [
           {
-            userName: "admin",
+            userName: "system.admin",
             lastName: "OBI",
             firstName: "PAUL",
             middleName: "COLLINS",
             email: "pcollinsmb@gmail.com",
             phone: "08068535539",
-            isAdmin: 1,
+            isSystemAdmin: 1,
+            isInstitutionAdmin: 0,
+            isLmsAdmin: 0,
+            status: 1,
+            firstLogin: 2,
+            password: pw_hashed,
+            passwordResets: [pw_hashed]
+          },
+          {
+            userName: "lms.admin",
+            lastName: "OBI",
+            firstName: "PAULINE",
+            middleName: "ADA",
+            email: "pcollinso@yahoo.com",
+            phone: "09072258248",
+            isSystemAdmin: 0,
+            isInstitutionAdmin: 0,
+            isLmsAdmin: 1,
             status: 1,
             firstLogin: 2,
             password: pw_hashed,
@@ -85,6 +102,56 @@ console.log('seeding started...');
           },
         ],
       },
+      /*{
+        model: "Permission",
+        documents: [
+          {
+            name: "institution:read",
+          },
+          {
+            name: "institution:write",
+          },
+          {
+            name: "institution:delete",
+          },
+          {
+            name: "user:read",
+          },
+          {
+            name: "user:write",
+          },
+          {
+            name: "user:delete",
+          },
+          {
+            name: "candidate:read",
+          },
+          {
+            name: "candidate:write",
+          },
+          {
+            name: "candidate:delete",
+          },
+          {
+            name: "exam:read",
+          },
+          {
+            name: "exam:write",
+          },
+          {
+            name: "exam:delete",
+          },
+          {
+            name: "exam:review",
+          },
+          {
+            name: "exam:coordinate",
+          },
+          {
+            name: "candidate:delete",
+          },
+        ],
+      },*/
       {
         model: "Module",
         documents: [
@@ -96,6 +163,9 @@ console.log('seeding started...');
           },
           {
             name: "EXAM",
+          },
+          {
+            name: "SYSTEM",
           },
           {
             name: "REPORT",
@@ -217,6 +287,94 @@ console.log('seeding started...');
           {
             name: "Ph.D",
           }
+        ],
+      },
+      {
+        model: "Institution",
+        documents: [
+          {
+            name: "LMS",
+            institutionCode: "LMS098712",
+            address: "",
+            email: "pcollinsmb@gmail.com",
+            phone: "08068535539",
+            logo: "",
+            institutionConfig: {
+              enable2wa: 0,
+              anyCanReview: 1,
+            },
+            modules: [],
+          }
+        ],
+      },
+      {
+        model: "SystemMenu",
+        documents: [
+          {
+            title: "Set Question",
+            route: "set-question",
+            icon: "CheckSquareIcon",
+            target: "_parent",
+            href: ""
+          },
+          {
+            title: "Institution",
+            icon: "CheckSquareIcon",
+            children: [
+              {
+                title: "Create Institution",
+                route: "create-institution",
+                icon: "CheckSquareIcon",
+                target: "_parent",
+                href: ""
+              },
+              {
+                title: "Create Inst. Admin",
+                route: "create-institution-admin",
+                icon: "MailIcon",
+                target: "_parent",
+                href: ""
+              },
+              {
+                title: "Configure Institution",
+                route: "configure-institution",
+                icon: "MessageSquareIcon",
+                target: "_parent",
+                href: ""
+              },
+            ]
+          },
+          {
+            title: "Users",
+            icon: "MessageSquareIcon",
+            children: [
+              {
+                title: "Create User",
+                route: "create-institution",
+                icon: "CheckSquareIcon",
+                target: "_parent",
+                href: ""
+              },
+              {
+                title: "Configure User",
+                icon: "MessageSquareIcon",
+                children: [
+                  {
+                    title: "Exam Config",
+                    route: "exam-config",
+                    icon: "CheckSquareIcon",
+                    target: "_parent",
+                  },
+                  {
+                    title: "Application Config",
+                    route: "application-config",
+                    icon: "CheckSquareIcon",
+                    target: "_parent",
+                  },
+                ]
+              },
+            ]
+          },
         ],
       },
     ];

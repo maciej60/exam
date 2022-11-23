@@ -104,7 +104,7 @@ let appRoot = require("app-root-path");
    */
 
 
-   let arr = [
+   /*let arr = [
   {
     a: 1,
     b: 2,
@@ -126,6 +126,90 @@ let appRoot = require("app-root-path");
     j: 10,
   },
 ];
-obj = await utils.pickFromShuffledArray(arr, 10, 2);
- return res.status(200).json(obj);
+obj = await utils.pickFromShuffledArray(arr, 10, 2);*/
+
+  /**
+   * test menu
+   */
+  obj =[
+    {
+      id: "1",
+      title: "user",
+      icon: "FileTextIcon",
+      children: [
+        {
+          title: "user child 1",
+          route: "api-user",
+          id: "1.1",
+          status: false,
+        },
+        {
+          title: "user child 2",
+          route: "api-user-2",
+          id: "1.2",
+          status: false,
+        },
+        {
+          title: "user child 3",
+          route: "api-user-3",
+          id: "1.3",
+          status: false,
+        },
+      ],
+    },
+    {
+      id: "2",
+
+      title: "user2",
+      icon: "FileTextIcon",
+      children: [
+        {
+          title: "user2 child 1",
+          route: "api-user2-1",
+          id: "2.1",
+          status: false,
+        },
+        {
+          title: "user2 child 2",
+          route: "api-user2-2",
+          id: "2.2",
+          status: false,
+        },
+        {
+          title: "user2 child 3",
+          route: "api-user2-3",
+          id: "2.3",
+          status: false,
+        },
+        {
+          title: "nested user",
+          icon: "FileTextIcon",
+          id: "2.4",
+          status: false,
+
+          children: [
+            {
+              title: "nested user child 1",
+              route: "api-user-child-1",
+              id: "2.4.1",
+              status: false,
+            },
+            {
+              title: "nested user child 2",
+              route: "api-user-child-2",
+              id: "2.4.2",
+              status: false,
+            },
+            {
+              title: "nested user child 3",
+              route: "api-user-child-3",
+              id: "2.4.3",
+              status: false,
+            },
+          ],
+        },
+      ],
+    },
+  ];
+  return res.status(200).json(obj);
 });

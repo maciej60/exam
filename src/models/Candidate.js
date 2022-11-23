@@ -16,7 +16,7 @@ const isUser = new mongoose.Schema({
     }
 });
 
-const CandidateSchema = new mongoose.Schema(
+const oSchema = new mongoose.Schema(
     {
         isUser,
         title: String,
@@ -81,9 +81,9 @@ const CandidateSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
-CandidateSchema.index({ "email": 1, "institutionId": 1}, { "unique": true });
-CandidateSchema.index({ "phone": 1, "institutionId": 1}, { "unique": true });
-CandidateSchema.pre("save", function (next) {
+oSchema.index({ "email": 1, "institutionId": 1}, { "unique": true });
+oSchema.index({ "phone": 1, "institutionId": 1}, { "unique": true });
+oSchema.pre("save", function (next) {
     /**
      * if password is not provided, put this bcrypt code for 'password'
      */
@@ -114,7 +114,7 @@ CandidateSchema.pre("save", function (next) {
     next();
 });
 
-CandidateSchema.pre("updateOne", function () {
+oSchema.pre("updateOne", function () {
     /**
      * here we have access to the query object not the data object because mongoose will query the doc before updating
      * so u can only modify the query object to fetch the correct data for the update
@@ -125,6 +125,6 @@ CandidateSchema.pre("updateOne", function () {
     this.set({ email: this._update.$set.email.toLowerCase() });
 });
 
-CandidateSchema.plugin(mongoosePaginate);
-CandidateSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('Candidate', CandidateSchema);
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('Candidate', oSchema, "candidates");

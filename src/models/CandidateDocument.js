@@ -3,7 +3,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const _ = require("lodash");
 
-const candidateDocument = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         documentType: String,
         fileName: String,
         fileType: Array,
@@ -28,8 +28,8 @@ const candidateDocument = new mongoose.Schema({
     },
     { timestamps: true }
 );
-candidateDocument.index({ "documentType": 1, "institutionId": 1, "candidateId": 1}, { "unique": true });
+oSchema.index({ "documentType": 1, "institutionId": 1, "candidateId": 1}, { "unique": true });
 
-candidateDocument.plugin(mongoosePaginate);
-candidateDocument.plugin(aggregatePaginate);
-module.exports = mongoose.model('CandidateDocument', candidateDocument, 'candidate_documents');
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('CandidateDocument', oSchema, 'candidate_documents');

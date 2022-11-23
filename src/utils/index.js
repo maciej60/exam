@@ -82,7 +82,7 @@ function buildQueryOptionSort(sort) {
 
 function comparePassword(provided, existing) {
   return bcrypt.compareSync(provided, existing);
-};
+}
 
 Date.prototype.toMysqlFormat = function () {
   return (
@@ -257,7 +257,7 @@ module.exports = {
     let date2_month = date2.month;
     // let date2_day = date2.day;
     let date2_year = date2.year;
-    return date1_month == date2_month && date1_year == date2_year;
+    return date1_month === date2_month && date1_year === date2_year;
   },
 
   pickFromShuffledArray: async (arr, freq = 10, get = 2) => {
@@ -308,7 +308,7 @@ module.exports = {
     let { url, obj } = params;
     let u_next = new URL(url);
     let u_prev = new URL(url);
-    sort = u_next.searchParams.get("sort");
+    let sort = u_next.searchParams.get("sort");
     // build next page
     u_next.searchParams.set("page", obj.next ? obj.next : "");
     u_next.searchParams.set("sort", sort);
@@ -507,14 +507,26 @@ module.exports = {
     return res.status(200).json({
       status: "success",
       code: "00",
-      data,
-      message: msg,
+      data: data || [],
+      message: msg || "Successful",
     });
   },
 
-  sendTokenResponse: (user, statusCode, res, message = "Action successful") => {
+  send_json_error_response: async ({ res, data, msg, errorCode, statusCode=200 }) => {
+    await logger.filecheck(
+        `ERROR; time: ${time}; message: ${msg}; errorCode: ${errorCode} } \n`
+    );
+    return res.status(statusCode).json({
+      status: "error",
+      code: errorCode || 'E01',
+      data: data || [],
+      message: msg || "Error occurred",
+    });
+  },
+
+  sendTokenResponse: (obj, statusCode, res, message = "Action successful") => {
     const token = jwt.sign(
-      { id: user.id, taxId: user.taxId },
+      { id: obj.user.id },
       process.env.JWT_SECRET,
       {
         expiresIn: process.env.JWT_EXPIRE,
@@ -523,7 +535,7 @@ module.exports = {
     res.status(statusCode).json({
       status: "success",
       code: "00",
-      data: user,
+      data: obj,
       message: message,
       token,
     });

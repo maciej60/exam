@@ -3,7 +3,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const _ = require("lodash");
 
-const candidateEmployment = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         employmentNumber: String,
         dateOfFirstAppointment: Date,
         ministry: String,
@@ -26,6 +26,6 @@ const candidateEmployment = new mongoose.Schema({
     { timestamps: true }
 )
 
-candidateEmployment.plugin(mongoosePaginate);
-candidateEmployment.plugin(aggregatePaginate);
-module.exports = mongoose.model('CandidateEmployment', candidateEmployment, 'candidate_employments');
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('CandidateEmployment', oSchema, 'candidate_employments');

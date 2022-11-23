@@ -13,7 +13,7 @@ let emailTemplate = require(`${appRoot}/src/utils/emailTemplate`);
 const time = new Date(Date.now()).toLocaleString();
 
 /**
- * @desc Login 
+ * @desc Login
  * @route POST /api/v2/auth/login
  * @access PUBLIC
  */
@@ -21,38 +21,57 @@ const time = new Date(Date.now()).toLocaleString();
 exports.login = asyncHandler(async (req, res, next) => {
   const { login, password } = req.body;
   if (!login || !password) {
-    return next(
-      new ErrorResponse("Email/Phone and password is required", 200, "E301-100")
-    );
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Email/Phone and password is required`,
+      errorCode: "E301",
+      statusCode: 200
+    });
   }
   const check_user = await helper.UserHelper.getUser({
     $or: [{ email: login }, { phone: login }],
-  });  
+  });
   if (!check_user) {
-    return next(
-      new ErrorResponse("Email or password is incorrect", 200, "E301-102")
-    );
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Email or password is incorrect, user not found`,
+      errorCode: "e404",
+      statusCode: 200
+    });
   }
   const isMatch = await utils.comparePassword(password, check_user.password);
   if (!isMatch) {
-    return next(
-      new ErrorResponse("Email or password is incorrect", 200, "E301-103")
-    );
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Email or password is incorrect`,
+      errorCode: "E502",
+      statusCode: 200
+    });
   }
   const get_user = await helper.UserHelper.getUser(check_user._id);
-  if (check_user.firstLogin == 1) {
+  const get_menu = await helper.MenuHelper.getUserMenu({userId: check_user._id});
+  if (check_user.firstLogin === 1) {
     utils.sendNoTokenResponse(
-      get_user,
-      200,
-      res,
-      "First time login, kindly change your password",
-      "default-password"
+        get_user,
+        200,
+        res,
+        "First time login, kindly change your password",
+        "default-password"
     );
   }
-  if (check_user.isAdmin == 1) {
-    
+  if (check_user.isSystemAdmin === 1) {
+
   }
-  utils.sendTokenResponse(get_user, 200, res, "User login successful");
+  if (check_user.isInstitutionAdmin === 1) {
+
+  }
+  if (check_user.isLmsAdmin === 1) {
+
+  }
+  utils.sendTokenResponse({user: get_user, menu: get_menu}, 200, res, "User login successful");
 });
 
 /**
@@ -81,7 +100,13 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
      */
     const { login, reset_url } = req.body;
     if (!login) {
-      return next(new ErrorResponse("Login is required", 200, "e404"));
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Login param is required`,
+        errorCode: "E404",
+        statusCode: 200
+      });
     }
 
     /**
@@ -103,9 +128,13 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
               Object.values(validation)[0]
           } \n`
       );
-      return next(
-        new ErrorResponse(`${Object.values(validation)[0]}`, 200, "E300")
-      );
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `${Object.values(validation)[0]}`,
+        errorCode: "E502",
+        statusCode: 200
+      });
     }
 
     let isEmail, isPhone = false;
@@ -119,9 +148,13 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
       }
     }
     if (!check_user) {
-      return next(
-        new ErrorResponse("Email/Phone do not exist!", 200, "e404")
-      );
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Email/Phone do not exist!`,
+        errorCode: "E404",
+        statusCode: 200
+      });
     }
     let sender;
     let user_id = check_user._id;
@@ -182,7 +215,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         subject,
       };
       sender = await utils.send_email_api(p);
-      if (sender.response.Code == "02") {
+      if (sender.response.Code === "02") {
         success = 1;
       }
       let email_log_data = {
@@ -203,13 +236,13 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
       msg: "Forgot password link successfully sent",
     });
   } catch (error) {
-    return next(
-      new ErrorResponse(
-        `Forgot password failed with error ${error.message}`,
-        200,
-        error.errorCode
-      )
-    );
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Forgot password failed with error ${error.message}`,
+      errorCode: error.errorCode,
+      statusCode: 200
+    });
   }
 });
 
@@ -262,18 +295,34 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
               Object.values(validation)[0]
           } \n`
       );
-      return next(
-        new ErrorResponse(`${Object.values(validation)[0]}`, 200, "E300")
-      );
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `${Object.values(validation)[0]}`,
+        errorCode: "E301",
+        statusCode: 200
+      });
     }
 
     if (!(await utils.passwordPolicyPassed(password))) {
-      return next(new ErrorResponse("Password should contain a letter, number, upper, lower, special character and greater than 8!", 200, "e404"));
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Password should contain a letter, number, upper, lower, special character and greater than 8!`,
+        errorCode: "E502",
+        statusCode: 200
+      });
     }
 
     const ObjectId = require("mongoose").Types.ObjectId;
     if (!ObjectId.isValid(resetPasswordCode)) {
-      return next(new ErrorResponse("User do not exist", 200, "e404"));
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `User account do not exist, invalid userID!`,
+        errorCode: "E404",
+        statusCode: 200
+      });
     }
 
     let user_id = new ObjectId(resetPasswordCode);
@@ -282,15 +331,25 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
     });
  
     if (!check_user) {
-      return next(new ErrorResponse("User account do not exist!", 200, "e404"));
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `User account do not exist!`,
+        errorCode: "E404",
+        statusCode: 200
+      });
     }
 
     let old_password = check_user.password;
     let passwordResets = check_user.passwordResets;
     if (await utils.passwordResetMatches(passwordResets, password)) {
-      return next(
-        new ErrorResponse("This password is already used!", 200, "e404")
-      );
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `This password is already used!`,
+        errorCode: "E503",
+        statusCode: 200
+      });
     }
     
     password = await utils.hashPassword(password);
@@ -320,7 +379,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
       subject,
     };
     const send_email = await utils.send_email_api(p);
-    if (send_email.response.Code == "02") {
+    if (send_email.response.Code === "02") {
       success = 1;
     }
     console.log(`*** email sent ***`);
@@ -342,13 +401,13 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
     });
   } catch (error) {
     console.log(error);
-    return next(
-      new ErrorResponse(
-        `Password reset failed with error ${error.message}`,
-        200,
-        error.errorCode
-      )
-    );
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Password reset failed with error ${error.message}`,
+      errorCode: error.errorCode,
+      statusCode: 200
+    });
   }
 });
 
@@ -401,38 +460,70 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
               Object.values(validation)[0]
           } \n`
       );
-      return next(
-        new ErrorResponse(`${Object.values(validation)[0]}`, 200, "E300")
-      );
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `${Object.values(validation)[0]}`,
+        errorCode: "E303",
+        statusCode: 200
+      });
     }
 
     if (!(await utils.passwordPolicyPassed(password))) {
-      return next(new ErrorResponse("Password should contain a letter, number, upper, lower, special character and greater than 8!", 200, "e404"));
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Password should contain a letter, number, upper, lower, special character and greater than 8!`,
+        errorCode: "E502",
+        statusCode: 200
+      });
     }
 
     const ObjectId = require("mongoose").Types.ObjectId;
     if (!ObjectId.isValid(user_id)) {
-      return next(new ErrorResponse("User do not exist", 200, "e404"));
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `User do not exist, invalid userID`,
+        errorCode: "E404",
+        statusCode: 200
+      });
     }
     user_id = new ObjectId(user_id);
     const check_user = await helper.UserHelper.getUser({
       _id: user_id,
     });
     if (!check_user) {
-      return next(new ErrorResponse("User account do not exist!", 200, "e404"));
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `User account do not exist!`,
+        errorCode: "E404",
+        statusCode: 200
+      });
     }
 
     let old_password = check_user.password;
     let passwordResets = check_user.passwordResets;
 
     if (!await utils.comparePassword(currentPassword, old_password)) {
-      return next(new ErrorResponse("Current password provided do not match!", 200, "e404"));
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Current password provided do not match!`,
+        errorCode: "E501",
+        statusCode: 200
+      });
     }
 
     if (await utils.passwordResetMatches(passwordResets, password)) {
-      return next(
-        new ErrorResponse("The new password provided is already used!", 200, "e404")
-      );
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `The new password provided is already used!`,
+        errorCode: "E501",
+        statusCode: 200
+      });
     }
     
     password = await utils.hashPassword(password);
@@ -459,7 +550,7 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
       subject,
     };
     const send_email = await utils.send_email_api(p);
-    if (send_email.response.Code == "02") {
+    if (send_email.response.Code === "02") {
       success = 1;
     }
     console.log(`*** email sent ***`);
@@ -480,13 +571,13 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
       msg: "Password change successful",
     });
   } catch (error) {
-    return next(
-      new ErrorResponse(
-        `Password change failed with error ${error.message}`,
-        200,
-        error.errorCode
-      )
-    );
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Password change failed with error ${error.message}`,
+      errorCode: error.errorCode,
+      statusCode: 200
+    });
   }
 });
 

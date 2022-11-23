@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
-const subTopicSchema = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         name: String,
-        code: String,
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
@@ -11,12 +12,12 @@ const subTopicSchema = new mongoose.Schema({
         subjectId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "InstitutionSubject",
+            ref: "Subject",
         },
         topicId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "InstitutionSubjectTopic",
+            ref: "SubjectTopic",
         },
         tags: Array,
         createdBy: {
@@ -27,6 +28,9 @@ const subTopicSchema = new mongoose.Schema({
     },
     { timestamps: true });
 
-subTopicSchema.index({ "name": 1, "topicId": 1}, { "unique": true });
-subTopicSchema.index({ "code": 1, "topicId": 1}, { "unique": true });
-module.exports = mongoose.model('InstitutionSubTopic', subTopicSchema, 'institution_sub_topics');
+oSchema.index({ "name": 1, "topicId": 1}, { "unique": true });
+oSchema.index({ "code": 1, "topicId": 1}, { "unique": true });
+
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+module.exports = mongoose.model('SubTopic', oSchema, 'sub_topics');

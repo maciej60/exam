@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const qualificationSchema = new mongoose.Schema({
+const oSchema = new mongoose.Schema({
         name: {
             type: String,
             trim: true,
@@ -10,4 +10,4 @@ const qualificationSchema = new mongoose.Schema({
     }
 );
 
-module.exports = mongoose.model('Qualification', qualificationSchema, 'qualifications');
+module.exports = mongoose.model('Qualification', oSchema, 'qualifications');

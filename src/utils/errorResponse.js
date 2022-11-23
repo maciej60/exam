@@ -12,7 +12,7 @@ class ErrorResponse extends Error {
     this.statusCode = statusCode || 200;
     this.errorCode = errorCode || 'E01';
     logger.filecheck(
-      `ERROR; time: ${time}; message: ${this.message}; statusCode: ${this.statusCode}; errorCode: ${this.errorCode} } \n`
+        `ERROR; time: ${time}; message: ${this.message}; statusCode: ${this.statusCode}; errorCode: ${this.errorCode} } \n`
     );
   }
 }

@@ -17,17 +17,14 @@ exports.protect = asyncHandler(async (req, res, next) => {
   if (!token) {
     return next(new ErrorResponse("Not authorized to access this route"), 401);
   }
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
     let createdBy = req.user.id;
-    let taxId = req.user.taxId;
     const isValidId = await utils.isValidObjectId(createdBy);
-    if (!isValidId || taxId.length < 6) {
+    if (!isValidId) {
       return next(
         new ErrorResponse(
-          (message = "UserId/TaxId is invalid!"),
+          (message = "UserId is invalid!"),
           (statusCode = 200),
           (errorCode = "E02")
         )
@@ -38,7 +35,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
     logger.filecheck(
       `ERROR: message= ${error.message}, statusCode= ${error.statusCode}, errorCode= ${error.errorCode} at ${time}  } \n`
     );
-    if (error.name == "TokenExpiredError") {
+    if (error.name === "TokenExpiredError") {
       return next(
         new ErrorResponse(
           (message = "Token expired!"),
@@ -53,7 +50,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
 exports.guardExternalRequests = asyncHandler(async (req, res, next) => {
   let apikey = req.headers.apikey;
-  if (!apikey || apikey != process.env.REVOTAX_API_KEY) {
+  if (!apikey || apikey != process.env.EXTERNAL_API_KEY) {
     return next(new ErrorResponse("Not authorized to access this route"), 401);
   }
   try {

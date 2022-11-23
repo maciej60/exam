@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
-const mongoosePaginate = require("mongoose-paginate-v2");
-let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
-const SmsLogSchema = new mongoose.Schema(
+const oSchema = new mongoose.Schema(
   {
     phone: {
       type: String,
@@ -17,6 +15,4 @@ const SmsLogSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-SmsLogSchema.plugin(mongoosePaginate);
-SmsLogSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model("SmsLog", SmsLogSchema, 'sms_logs');
+module.exports = mongoose.model("SmsLog", oSchema, 'sms_logs');
