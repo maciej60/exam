@@ -26,7 +26,9 @@ module.exports = {
   SubjectHelper: require("./subjectHelper"),
   QuestionHelper: require("./questionHelper"),
   MenuHelper: require("./menuHelper"),
+  CandidateHelper: require("./candidateHelper"),
   SmsLogHelper: require("./smsLogHelper"),
   EmailLogHelper: require("./emailLogHelper"),
+  DropDownHelper: require("./dropdownHelper"),
 };
 

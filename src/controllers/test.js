@@ -130,6 +130,8 @@ obj = await utils.pickFromShuffledArray(arr, 10, 2);*/
 
   /**
    * test menu
+   * lsof -i tcp:3009
+   * kill -9 <pid>
    */
   obj =[
     {

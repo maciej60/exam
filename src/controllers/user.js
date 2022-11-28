@@ -29,8 +29,8 @@ exports.addAdmin = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Institution must be provided to proceed`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "USR01",
+        statusCode: 406
       });
     let code, institutionId;
     if (e00987TE4 && !_.isEmpty(e00987TE4)) code = e00987TE4; else code = institutionCode;
@@ -48,8 +48,8 @@ exports.addAdmin = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Institution admin create failed with validation error ${error.details[0].message}`,
-        errorCode: "E502",
-        statusCode: 200
+        errorCode: "USR02",
+        statusCode: 400
       });
     let institution = await helper.InstitutionHelper.getInstitution({where: {institutionCode: code}});
     if (_.isEmpty(institution))
@@ -57,8 +57,8 @@ exports.addAdmin = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Institution do not exist`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "USR03",
+        statusCode: 404
       });
     institution = institution[0];
     institutionId = institution._id;
@@ -68,8 +68,8 @@ exports.addAdmin = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Institution admin already created`,
-        errorCode: "E302",
-        statusCode: 200
+        errorCode: "USR04",
+        statusCode: 201
       });
     /**
      * assemble user params for create
@@ -143,14 +143,15 @@ exports.addAdmin = asyncHandler(async (req, res, next) => {
         res,
         data: create_user,
         msg: "Institution Admin successfully created",
+        statusCode: 201
       });
     } else {
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `Institution Admin not created`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "USR05",
+        statusCode: 500
       });
     }
   } catch (error) {
@@ -158,8 +159,8 @@ exports.addAdmin = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `Institution Admin create failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "USR06",
+      statusCode: 500
     });
   }
 });
@@ -179,8 +180,8 @@ exports.updateAdmin = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `User not provided`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "USR07",
+        statusCode: 406
       });
     const validationSchema = Joi.object({
       firstName: Joi.string().min(1).max(50).required(),
@@ -196,8 +197,8 @@ exports.updateAdmin = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Institution admin update failed with validation error ${error.details[0].message}`,
-        errorCode: "E502",
-        statusCode: 200
+        errorCode: "USR08",
+        statusCode: 400
       });
     /**
      * assemble user params for update
@@ -225,7 +226,8 @@ exports.updateAdmin = asyncHandler(async (req, res, next) => {
         res,
         data: update_user.result,
         msg: update_user.message,
-        errorCode: "E401"
+        errorCode: "USR09",
+        statusCode: 501
       });
     } else {
       await logger.filecheck(
@@ -237,6 +239,7 @@ exports.updateAdmin = asyncHandler(async (req, res, next) => {
         res,
         data: update_user.result,
         msg: "Institution Admin successfully updated",
+        statusCode: 201
       });
     }
   } catch (error) {
@@ -245,7 +248,7 @@ exports.updateAdmin = asyncHandler(async (req, res, next) => {
       data: [],
       msg: `Institution Admin update failed with error ${error.message}`,
       errorCode: error.errorCode,
-      statusCode: 200
+      statusCode: 500
     });
   }
 });
@@ -266,8 +269,8 @@ exports.addUser = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Institution must be provided to proceed`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "USR10",
+        statusCode: 406
       });
     const validationSchema = Joi.object({
       firstName: Joi.string().min(1).max(50).required(),
@@ -283,8 +286,8 @@ exports.addUser = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Institution user create failed with validation error ${error.details[0].message}`,
-        errorCode: "E502",
-        statusCode: 200
+        errorCode: "USR11",
+        statusCode: 400
       });
     const ObjectId = require("mongoose").Types.ObjectId;
     let institution = await helper.InstitutionHelper.getInstitution({where: {_id: new ObjectId(institutionId)}});
@@ -293,8 +296,8 @@ exports.addUser = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Institution do not exist`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "USR12",
+        statusCode: 404
       });
     institution = institution[0];
     institutionId = institution._id;
@@ -306,8 +309,8 @@ exports.addUser = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Institution user email/phone already exist`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "USR13",
+        statusCode: 404
       });
     /**
      * assemble user params for create
@@ -381,14 +384,15 @@ exports.addUser = asyncHandler(async (req, res, next) => {
         res,
         data: create_user,
         msg: "Institution User successfully created",
+        statusCode: 201
       });
     } else {
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `Institution User not created`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "USR14",
+        statusCode: 502
       });
     }
   } catch (error) {
@@ -397,7 +401,7 @@ exports.addUser = asyncHandler(async (req, res, next) => {
       data: [],
       msg: `Institution User create failed with error ${error.message}`,
       errorCode: error.errorCode,
-      statusCode: 200
+      statusCode: 500
     });
   }
 });
@@ -417,8 +421,8 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `User not provided`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "USR15",
+        statusCode: 406
       });
     const validationSchema = Joi.object({
       firstName: Joi.string().min(1).max(50).required(),
@@ -434,8 +438,8 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Institution user update failed with validation error ${error.details[0].message}`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "USR17",
+        statusCode: 400
       });
     /**
      * assemble user params for update
@@ -463,7 +467,8 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
         res,
         data: update_user.result,
         msg: update_user.message,
-        errorCode: "E401"
+        errorCode: "USR18",
+        statusCode: 502
       });
     } else {
       await logger.filecheck(
@@ -475,6 +480,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
         res,
         data: update_user.result,
         msg: "Institution user successfully updated",
+        statusCode: 201
       });
     }
   } catch (error) {
@@ -483,7 +489,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
       data: [],
       msg: `Institution user update failed with error ${error.message}`,
       errorCode: error.errorCode,
-      statusCode: 200
+      statusCode: 500
     });
   }
 });
@@ -501,8 +507,8 @@ exports.listUsers = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Provide query params like sort, page and per_page!`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "USR19",
+        statusCode: 400
       });
     }
     let phone, email, name, status, isInstitutionAdmin, isLmsAdmin, isSystemAdmin, dateTo, dateFrom;
@@ -560,8 +566,8 @@ exports.listUsers = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${queryOptions} is not valid!`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "USR20",
+        statusCode: 400
       });
     }
     /**
@@ -586,23 +592,24 @@ exports.listUsers = asyncHandler(async (req, res, next) => {
         res,
         data: obj,
         msg: "User list successfully fetched",
+        statusCode: 200
       });
     } else {
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `No record!`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "USR21",
+        statusCode: 404
       });
     }
   } catch (error) {
     return utils.send_json_error_response({
       res,
       data: [],
-      msg: `User list failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      msg: `User list failed with error: ${error.message}, errorcode:${error.errorCode}`,
+      errorCode: "USR22",
+      statusCode: 500
     });
   }
 });

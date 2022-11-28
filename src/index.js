@@ -1,11 +1,9 @@
 const express = require('express');
 require("dotenv").config({path: "../.env"});
 const morgan = require('morgan');
-const fileupload = require('express-fileupload');
 const ErrorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
 const cors = require('cors');
-// const bodyParser = require("body-parser");
 const app = express();
 const utils = require("./utils");
 
@@ -18,9 +16,6 @@ app.use(cors());
 // start mongo db
 connectDB();
 
-// file upload
-app.use(fileupload());
-
 // Route files,
 const auth = require("./routes/auth");
 const menu = require("./routes/menu");
@@ -30,6 +25,8 @@ const institution = require("./routes/institution");
 const application = require("./routes/application");
 const subject = require("./routes/subject");
 const question = require("./routes/question");
+const dropdown = require("./routes/dropdown");
+const candidate = require("./routes/candidate");
 const communication = require("./routes/communication");
 const test = require("./routes/test");
 const { protect } = require("./middleware/auth");
@@ -66,7 +63,8 @@ app.use("/api/v2/institution", institution);
 app.use("/api/v2/application", application);
 app.use("/api/v2/subject", subject);
 app.use("/api/v2/question", question);
-// app.use("/api/v2/candidate", candidate);
+app.use("/api/v2/dropdown", dropdown);
+app.use("/api/v2/candidate", candidate);
 app.use("/api/v2/communication", communication);
 app.use("/api/v2/test", test);
 

@@ -46,8 +46,8 @@ exports.add = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${subjectPascal} create validation failed with error: ${error.details[0].message}`,
-        errorCode: "E401",
-        statusCode: 200
+        errorCode: "APP01",
+        statusCode: 406
       });
     let createdBy = req.user.id || null;
     let {name, startDate, endDate, institutionId, documentsRequired} = req.body;
@@ -70,15 +70,16 @@ exports.add = asyncHandler(async (req, res, next) => {
     return utils.send_json_response({
       res,
       data: create,
-      msg: `${subjectPascal} successfully created z.`,
+      msg: `${subjectPascal} successfully created.`,
+      statusCode: 201
     });
   } catch (error) {
     return utils.send_json_error_response({
       res,
       data: [],
       msg: `${subjectPascal} create failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP02",
+      statusCode: 500
     });
   }
 });
@@ -95,14 +96,13 @@ exports.list = asyncHandler(async (req, res, next) => {
      * build query options for mongoose-paginate
      */
     const queryOptions = await utils.buildQueryOptions(req.query);
-
     if (typeof queryOptions === "string") {
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `${queryOptions} is not valid!`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "APP03",
+        statusCode: 400
       });
     }
     /**
@@ -144,14 +144,15 @@ exports.list = asyncHandler(async (req, res, next) => {
         res,
         data: obj,
         msg: `${subjectPascal} list successfully fetched`,
+        statusCode: 200
       });
     } else {
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `No record!`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "APP04",
+        statusCode: 404
       });
     }
   } catch (error) {
@@ -159,8 +160,8 @@ exports.list = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `${subjectPascal} list failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP05",
+      statusCode: 505
     });
   }
 });
@@ -187,8 +188,8 @@ exports.update = asyncHandler(async (req, res) => {
         res,
         data: [],
         msg: `${subjectPascal} update validation failed with error: ${error.details[0].message}`,
-        errorCode: "E401",
-        statusCode: 200
+        errorCode: "APP06",
+        statusCode: 406
       });
     const {name, startDate, endDate, documentsRequired, id} = req.body;
     const data = {name, startDate, endDate, documentsRequired};
@@ -207,19 +208,21 @@ exports.update = asyncHandler(async (req, res) => {
         res,
         data: update.result,
         msg: update.message,
-        errorCode: "E401"
+        errorCode: "APP07",
+        statusCode: 502
       });
     return utils.send_json_response({
       res,
       data: update.result,
+      statusCode: 201
     });
   } catch (error) {
     return utils.send_json_error_response({
       res,
       data: [],
       msg: `Error: ${error} `,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP08",
+      statusCode: 500
     });
   }
 });
@@ -251,14 +254,15 @@ exports.remove = asyncHandler(async (req, res, next) => {
         res,
         data: del,
         msg: `${subjectPascal} successfully deleted`,
+        statusCode: 200
       });
     }else{
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `${subjectPascal} delete failed`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "APP08",
+        statusCode: 502
       });
     }
   } catch (error) {
@@ -266,14 +270,11 @@ exports.remove = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `${subjectPascal} delete failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP09",
+      statusCode: 500
     });
   }
 });
-
-
-
 
 /**
  * @desc ApplicationStage
@@ -299,8 +300,8 @@ exports.addStage = asyncHandler(async (req, res, next) => {
         res,
         data: error,
         msg: `${subjectPascal} stage validation failed with error: ${error.details[0].message}`,
-        errorCode: "E502",
-        statusCode: 200
+        errorCode: "APP10",
+        statusCode: 406
       });
     let createdBy = req.user.id || null;
     let {name, sequence, applicationId, institutionId} = req.body;
@@ -318,8 +319,8 @@ exports.addStage = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${subjectPascal} stage create failed`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "APP11",
+        statusCode: 502
       });
     await logger.filecheck(
         `INFO: ${subjectPascal} stage: ${name} created at ${time} with data ${JSON.stringify(
@@ -330,14 +331,15 @@ exports.addStage = asyncHandler(async (req, res, next) => {
       res,
       data: create,
       msg: `${subjectPascal} stage successfully created.`,
+      statusCode: 201
     });
   } catch (error) {
     return utils.send_json_error_response({
       res,
       data: [],
       msg: `${subjectPascal} stage create failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP13",
+      statusCode: 500
     });
   }
 });
@@ -362,8 +364,8 @@ exports.updateStage = asyncHandler(async (req, res) => {
         res,
         data: [],
         msg: `${subjectPascal} stage update validation failed with error: ${error.details[0].message}`,
-        errorCode: "E401",
-        statusCode: 200
+        errorCode: "APP14",
+        statusCode: 406
       });
     const {name, sequence, id} = req.body;
     const data = {name, sequence};
@@ -382,20 +384,22 @@ exports.updateStage = asyncHandler(async (req, res) => {
         res,
         data: update.result,
         msg: update.message,
-        errorCode: "E401"
+        errorCode: "APP15",
+        statusCode: 502
       });
     return utils.send_json_response({
       res,
       data: update.result,
       msg: `${subjectPascal} stage successfully updated.`,
+      statusCode: 201
     });
   } catch (error) {
     return utils.send_json_error_response({
       res,
       data: [],
       msg: `Error: ${error} `,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP16",
+      statusCode: 500
     });
   }
 });
@@ -427,14 +431,15 @@ exports.removeStage = asyncHandler(async (req, res, next) => {
         res,
         data: del,
         msg: `${subjectPascal} stage successfully deleted`,
+        statusCode: 200
       });
     }else{
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `${subjectPascal} stage delete failed`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "APP17",
+        statusCode: 502
       });
     }
   } catch (error) {
@@ -442,8 +447,8 @@ exports.removeStage = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `${subjectPascal} stage delete failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP18",
+      statusCode: 500
     });
   }
 });
@@ -467,8 +472,8 @@ exports.listStage = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${queryOptions} is not valid!`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "APP19",
+        statusCode: 400
       });
     }
     /**
@@ -507,14 +512,15 @@ exports.listStage = asyncHandler(async (req, res, next) => {
         res,
         data: obj,
         msg: `${subjectPascal} stage list successfully fetched`,
+        statusCode: 200
       });
     } else {
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `No record!`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "APP20",
+        statusCode: 404
       });
     }
   } catch (error) {
@@ -522,8 +528,8 @@ exports.listStage = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `${subjectPascal} stage list failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP21",
+      statusCode: 500
     });
   }
 });
@@ -558,8 +564,8 @@ exports.addPermission = asyncHandler(async (req, res, next) => {
         res,
         data: error,
         msg: `${subjectPascal} user permission validation failed with error: ${error.details[0].message}`,
-        errorCode: "E502",
-        statusCode: 200
+        errorCode: "APP22",
+        statusCode: 406
       });
     let createdBy = req.user.id || null;
     let {permission, stageLevel, userId, applicationId, institutionId, applicationStageId} = req.body;
@@ -579,8 +585,8 @@ exports.addPermission = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${subjectPascal} user permission create failed`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "APP23",
+        statusCode: 502
       });
     await logger.filecheck(
         `INFO: ${subjectPascal} user permission  created at ${time} with data ${JSON.stringify(
@@ -591,14 +597,15 @@ exports.addPermission = asyncHandler(async (req, res, next) => {
       res,
       data: create,
       msg: `${subjectPascal} user permission successfully created.`,
+      statusCode: 201
     });
   } catch (error) {
     return utils.send_json_error_response({
       res,
       data: [],
       msg: `${subjectPascal} user permission create failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP24",
+      statusCode: 500
     });
   }
 });
@@ -623,8 +630,8 @@ exports.updatePermission = asyncHandler(async (req, res) => {
         res,
         data: [],
         msg: `${subjectPascal} user permission update validation failed with error: ${error.details[0].message}`,
-        errorCode: "E401",
-        statusCode: 200
+        errorCode: "APP25",
+        statusCode: 406
       });
     const {permission, stageLevel, id} = req.body;
     const data = {permission, stageLevel};
@@ -643,20 +650,22 @@ exports.updatePermission = asyncHandler(async (req, res) => {
         res,
         data: update.result,
         msg: update.message,
-        errorCode: "E401"
+        errorCode: "APP26",
+        statusCode: 502
       });
     return utils.send_json_response({
       res,
       data: update.result,
       msg: `${subjectPascal} user permission successfully updated.`,
+      statusCode: 201
     });
   } catch (error) {
     return utils.send_json_error_response({
       res,
       data: [],
       msg: `Error: ${error} `,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP27",
+      statusCode: 500
     });
   }
 });
@@ -688,14 +697,15 @@ exports.removePermission = asyncHandler(async (req, res, next) => {
         res,
         data: del,
         msg: `${subjectPascal} user permission successfully deleted`,
+        statusCode: 200
       });
     }else{
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `${subjectPascal} user permission delete failed`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "APP28",
+        statusCode: 502
       });
     }
   } catch (error) {
@@ -703,8 +713,8 @@ exports.removePermission = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `${subjectPascal} user permission delete failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP29",
+      statusCode: 500
     });
   }
 });
@@ -722,8 +732,8 @@ exports.listPermission = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Provide query params like sort, page and per_page!`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "APP30",
+        statusCode: 400
       });
     }
     /**
@@ -735,8 +745,8 @@ exports.listPermission = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${queryOptions} is not valid!`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "APP31",
+        statusCode: 400
       });
     }
     /**
@@ -779,14 +789,15 @@ exports.listPermission = asyncHandler(async (req, res, next) => {
         res,
         data: obj,
         msg: `${subjectPascal} user permission list successfully fetched`,
+        statusCode: 200
       });
     } else {
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `No record!`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "APP32",
+        statusCode: 404
       });
     }
   } catch (error) {
@@ -794,8 +805,8 @@ exports.listPermission = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `${subjectPascal} user permission list failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP33",
+      statusCode: 500
     });
   }
 });
@@ -813,8 +824,8 @@ exports.test = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Provide query params like sort, page and per_page!`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "APP34",
+        statusCode: 400
       });
     }
     let where = [];
@@ -865,8 +876,8 @@ exports.test = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${queryOptions} is not valid!`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "APP35",
+        statusCode: 400
       });
     }
     /**
@@ -891,14 +902,15 @@ exports.test = asyncHandler(async (req, res, next) => {
         res,
         data: obj,
         msg: `${subjectPascal} user permission list successfully fetched`,
+        statusCode: 200
       });
     } else {
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `No record!`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "APP36",
+        statusCode: 404
       });
     }
   } catch (error) {
@@ -906,8 +918,8 @@ exports.test = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `${subjectPascal} user permission list failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "APP37",
+      statusCode: 500
     });
   }
 });

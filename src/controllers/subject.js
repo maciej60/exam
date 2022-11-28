@@ -63,8 +63,8 @@ exports.add = asyncHandler(async (req, res, next) => {
                 res,
                 data: [],
                 msg: `${subjectPascal} create validation failed with error: ${error.details[0].message}`,
-                errorCode: "E401",
-                statusCode: 200,
+                errorCode: "SUBO1",
+                statusCode: 406,
             });
         let { name, institutionId } = req.body;
         const ObjectId = require("mongoose").Types.ObjectId;
@@ -84,14 +84,15 @@ exports.add = asyncHandler(async (req, res, next) => {
             res,
             data: create,
             msg: `${subjectPascal} successfully created.`,
+            statusCode: 201
         });
     } catch (error) {
         return utils.send_json_error_response({
             res,
             data: [],
-            msg: `${subjectPascal} create failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            msg: `${subjectPascal} create failed with error ${error.message}, code: ${error.errorCode}`,
+            errorCode: "SUBO2",
+            statusCode: 502,
         });
     }
 });
@@ -113,8 +114,8 @@ exports.list = asyncHandler(async (req, res, next) => {
                 res,
                 data: [],
                 msg: `${queryOptions} is not valid!`,
-                errorCode: "E501",
-                statusCode: 200,
+                errorCode: "SUBO3",
+                statusCode: 400,
             });
         }
         /**
@@ -151,14 +152,15 @@ exports.list = asyncHandler(async (req, res, next) => {
                 res,
                 data: obj,
                 msg: `${subjectPascal} list successfully fetched`,
+                statusCode: 200
             });
         } else {
             return utils.send_json_error_response({
                 res,
                 data: [],
                 msg: `No record!`,
-                errorCode: "E404",
-                statusCode: 200,
+                errorCode: "SUBO4",
+                statusCode: 400,
             });
         }
     } catch (error) {
@@ -166,8 +168,8 @@ exports.list = asyncHandler(async (req, res, next) => {
             res,
             data: [],
             msg: `${subjectPascal} list failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "SUBO5",
+            statusCode: 500,
         });
     }
 });
@@ -191,8 +193,8 @@ exports.update = asyncHandler(async (req, res) => {
                 res,
                 data: [],
                 msg: `${subjectPascal} update validation failed with error: ${error.details[0].message}`,
-                errorCode: "E401",
-                statusCode: 200,
+                errorCode: "SUBO6",
+                statusCode: 406,
             });
         const { name, id } = req.body;
         const data = { name };
@@ -211,19 +213,21 @@ exports.update = asyncHandler(async (req, res) => {
                 res,
                 data: update.result,
                 msg: update.message,
-                errorCode: "E401",
+                errorCode: "SUBO7",
+                statusCode: 502
             });
         return utils.send_json_response({
             res,
             data: update.result,
+            statusCode: 201
         });
     } catch (error) {
         return utils.send_json_error_response({
             res,
             data: [],
             msg: `Error: ${error} `,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "SUBO8",
+            statusCode: 500,
         });
     }
 });
@@ -255,14 +259,15 @@ exports.remove = asyncHandler(async (req, res, next) => {
                 res,
                 data: del,
                 msg: `${subjectPascal} successfully deleted`,
+                statusCode: 200
             });
         }else{
             return utils.send_json_error_response({
                 res,
                 data: [],
                 msg: `${subjectPascal} delete failed`,
-                errorCode: "E501",
-                statusCode: 200
+                errorCode: "SUBO9",
+                statusCode: 501
             });
         }
     } catch (error) {
@@ -270,8 +275,8 @@ exports.remove = asyncHandler(async (req, res, next) => {
             res,
             data: [],
             msg: `${subjectPascal} delete failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "SUB10",
+            statusCode: 500,
         });
     }
 });
@@ -301,8 +306,8 @@ exports.addTopic = asyncHandler(async (req, res, next) => {
                 res,
                 data: [],
                 msg: `${subjectTopicPascal} create validation failed with error: ${error.details[0].message}`,
-                errorCode: "E401",
-                statusCode: 200,
+                errorCode: "SUB11",
+                statusCode: 406,
             });
         let createdBy = req.user.id || null;
         let { name, institutionId, subjectId } = req.body;
@@ -323,14 +328,15 @@ exports.addTopic = asyncHandler(async (req, res, next) => {
             res,
             data: create,
             msg: `${subjectTopicPascal} successfully created.`,
+            statusCode: 201
         });
     } catch (error) {
         return utils.send_json_error_response({
             res,
             data: [],
             msg: `${subjectTopicPascal} create failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "SUB12",
+            statusCode: 500,
         });
     }
 });
@@ -351,8 +357,8 @@ exports.listTopics = asyncHandler(async (req, res, next) => {
                 res,
                 data: [],
                 msg: `${queryOptions} is not valid!`,
-                errorCode: "E501",
-                statusCode: 200,
+                errorCode: "SUB13",
+                statusCode: 400,
             });
         }
         const ObjectId = require("mongoose").Types.ObjectId;
@@ -392,14 +398,15 @@ exports.listTopics = asyncHandler(async (req, res, next) => {
                 res,
                 data: obj,
                 msg: `${subjectTopicPascal} list successfully fetched`,
+                statusCode: 200
             });
         } else {
             return utils.send_json_error_response({
                 res,
                 data: [],
                 msg: `No record!`,
-                errorCode: "E404",
-                statusCode: 200,
+                errorCode: "SUB14",
+                statusCode: 404,
             });
         }
     } catch (error) {
@@ -407,8 +414,8 @@ exports.listTopics = asyncHandler(async (req, res, next) => {
             res,
             data: [],
             msg: `${subjectPascal} list failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "SUB15",
+            statusCode: 500,
         });
     }
 });
@@ -434,8 +441,8 @@ exports.updateTopic = asyncHandler(async (req, res) => {
                 res,
                 data: [],
                 msg: `${subjectTopicPascal} update validation failed with error: ${error.details[0].message}`,
-                errorCode: "E401",
-                statusCode: 200,
+                errorCode: "SUB16",
+                statusCode: 406,
             });
         const { name, status, id, subjectId } = req.body;
         const data = { name, status, subjectId };
@@ -454,19 +461,21 @@ exports.updateTopic = asyncHandler(async (req, res) => {
                 res,
                 data: update.result,
                 msg: update.message,
-                errorCode: "E401",
+                errorCode: "SUB17",
+                statusCode: 502
             });
         return utils.send_json_response({
             res,
             data: update.result,
+            statusCode: 201
         });
     } catch (error) {
         return utils.send_json_error_response({
             res,
             data: [],
             msg: `Error: ${error} `,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "SUB18",
+            statusCode: 500,
         });
     }
 });
@@ -498,14 +507,15 @@ exports.removeTopic = asyncHandler(async (req, res, next) => {
                 res,
                 data: del,
                 msg: `${subjectTopicPascal} successfully deleted`,
+                statusCode: 200
             });
         }else{
             return utils.send_json_error_response({
                 res,
                 data: [],
                 msg: `${subjectPascal} delete failed`,
-                errorCode: "E501",
-                statusCode: 200
+                errorCode: "SUB19",
+                statusCode: 501
             });
         }
     } catch (error) {
@@ -513,8 +523,8 @@ exports.removeTopic = asyncHandler(async (req, res, next) => {
             res,
             data: [],
             msg: `${subjectTopicPascal} delete failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "SUB20",
+            statusCode: 500,
         });
     }
 });
@@ -546,8 +556,8 @@ exports.addSubTopic = asyncHandler(async (req, res, next) => {
                 res,
                 data: [],
                 msg: `${subTopicPascal} create validation failed with error: ${error.details[0].message}`,
-                errorCode: "E401",
-                statusCode: 200,
+                errorCode: "SUB21",
+                statusCode: 406,
             });
         let createdBy = req.user.id || null;
         let { name, institutionId, subjectId, tags, topicId } = req.body;
@@ -570,14 +580,15 @@ exports.addSubTopic = asyncHandler(async (req, res, next) => {
             res,
             data: create,
             msg: `${subTopicPascal} successfully created.`,
+            statusCode: 201
         });
     } catch (error) {
         return utils.send_json_error_response({
             res,
             data: [],
             msg: `${subTopicPascal} create failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "SUB22",
+            statusCode: 500,
         });
     }
 });
@@ -599,8 +610,8 @@ exports.listSubTopics = asyncHandler(async (req, res, next) => {
                 res,
                 data: [],
                 msg: `${queryOptions} is not valid!`,
-                errorCode: "E501",
-                statusCode: 200,
+                errorCode: "SUB23",
+                statusCode: 400,
             });
         }
         /**
@@ -645,14 +656,15 @@ exports.listSubTopics = asyncHandler(async (req, res, next) => {
                 res,
                 data: obj,
                 msg: `${subTopicPascal} list successfully fetched`,
+                statusCode: 200
             });
         } else {
             return utils.send_json_error_response({
                 res,
                 data: [],
                 msg: `No record!`,
-                errorCode: "E404",
-                statusCode: 200,
+                errorCode: "SUB24",
+                statusCode: 404,
             });
         }
     } catch (error) {
@@ -660,8 +672,8 @@ exports.listSubTopics = asyncHandler(async (req, res, next) => {
             res,
             data: [],
             msg: `${subjectPascal} list failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "SUB25",
+            statusCode: 500,
         });
     }
 });
@@ -688,8 +700,8 @@ exports.updateSubTopic = asyncHandler(async (req, res) => {
                 res,
                 data: [],
                 msg: `${subTopicPascal} update validation failed with error: ${error.details[0].message}`,
-                errorCode: "E401",
-                statusCode: 200,
+                errorCode: "SUB26",
+                statusCode: 406,
             });
         const { name, id, subjectId, tags, topicId } = req.body;
         const data = { name, tags, subjectId, topicId };
@@ -708,19 +720,21 @@ exports.updateSubTopic = asyncHandler(async (req, res) => {
                 res,
                 data: update.result,
                 msg: update.message,
-                errorCode: "E401",
+                errorCode: "SUB27",
+                statusCode: 502
             });
         return utils.send_json_response({
             res,
             data: update.result,
+            statusCode: 201
         });
     } catch (error) {
         return utils.send_json_error_response({
             res,
             data: [],
             msg: `Error: ${error} `,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "SUB28",
+            statusCode: 500,
         });
     }
 });
@@ -752,14 +766,15 @@ exports.removeSubTopic = asyncHandler(async (req, res, next) => {
                 res,
                 data: del,
                 msg: `${subTopicPascal} successfully deleted`,
+                statusCode: 200
             });
         }else{
             return utils.send_json_error_response({
                 res,
                 data: [],
                 msg: `${subTopicPascal} delete failed`,
-                errorCode: "E501",
-                statusCode: 200
+                errorCode: "SUB29",
+                statusCode: 502
             });
         }
     } catch (error) {
@@ -767,8 +782,8 @@ exports.removeSubTopic = asyncHandler(async (req, res, next) => {
             res,
             data: [],
             msg: `${subTopicPascal} delete failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "SUB30",
+            statusCode: 500,
         });
     }
 });

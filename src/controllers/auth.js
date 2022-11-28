@@ -25,8 +25,8 @@ exports.login = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `Email/Phone and password is required`,
-      errorCode: "E301",
-      statusCode: 200
+      errorCode: "AUTH01",
+      statusCode: 400
     });
   }
   const check_user = await helper.UserHelper.getUser({
@@ -37,8 +37,8 @@ exports.login = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `Email or password is incorrect, user not found`,
-      errorCode: "e404",
-      statusCode: 200
+      errorCode: "AUTH02",
+      statusCode: 404
     });
   }
   const isMatch = await utils.comparePassword(password, check_user.password);
@@ -46,9 +46,9 @@ exports.login = asyncHandler(async (req, res, next) => {
     return utils.send_json_error_response({
       res,
       data: [],
-      msg: `Email or password is incorrect`,
-      errorCode: "E502",
-      statusCode: 200
+      msg: `Email or password is incorrect, user not found`,
+      errorCode: "AUTH03",
+      statusCode: 404
     });
   }
   const get_user = await helper.UserHelper.getUser(check_user._id);
@@ -104,8 +104,8 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Login param is required`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "AUTH04",
+        statusCode: 400
       });
     }
 
@@ -132,8 +132,8 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${Object.values(validation)[0]}`,
-        errorCode: "E502",
-        statusCode: 200
+        errorCode: "AUTH05",
+        statusCode: 400
       });
     }
 
@@ -152,8 +152,8 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Email/Phone do not exist!`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "AUTH07",
+        statusCode: 404
       });
     }
     let sender;
@@ -234,14 +234,15 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
       res,
       data: sender.response,
       msg: "Forgot password link successfully sent",
+      statusCode: 201
     });
   } catch (error) {
     return utils.send_json_error_response({
       res,
       data: [],
       msg: `Forgot password failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "AUTH07",
+      statusCode: 500
     });
   }
 });
@@ -299,8 +300,8 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${Object.values(validation)[0]}`,
-        errorCode: "E301",
-        statusCode: 200
+        errorCode: "AUTH08",
+        statusCode: 400
       });
     }
 
@@ -309,8 +310,8 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Password should contain a letter, number, upper, lower, special character and greater than 8!`,
-        errorCode: "E502",
-        statusCode: 200
+        errorCode: "AUTH09",
+        statusCode: 406
       });
     }
 
@@ -320,8 +321,8 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `User account do not exist, invalid userID!`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "AUTH10",
+        statusCode: 404
       });
     }
 
@@ -335,8 +336,8 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `User account do not exist!`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "AUTH11",
+        statusCode: 404
       });
     }
 
@@ -347,8 +348,8 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `This password is already used!`,
-        errorCode: "E503",
-        statusCode: 200
+        errorCode: "AUTH12",
+        statusCode: 406
       });
     }
     
@@ -398,6 +399,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
       res,
       data: send_email.response,
       msg: "Password reset successful",
+      statusCode: 201
     });
   } catch (error) {
     console.log(error);
@@ -405,8 +407,8 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `Password reset failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "AUTH13",
+      statusCode: 500
     });
   }
 });
@@ -464,8 +466,8 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${Object.values(validation)[0]}`,
-        errorCode: "E303",
-        statusCode: 200
+        errorCode: "AUTH14",
+        statusCode: 400
       });
     }
 
@@ -474,8 +476,8 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Password should contain a letter, number, upper, lower, special character and greater than 8!`,
-        errorCode: "E502",
-        statusCode: 200
+        errorCode: "AUTH15",
+        statusCode: 406
       });
     }
 
@@ -485,8 +487,8 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `User do not exist, invalid userID`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "AUTH16",
+        statusCode: 404
       });
     }
     user_id = new ObjectId(user_id);
@@ -498,8 +500,8 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `User account do not exist!`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "AUTH17",
+        statusCode: 404
       });
     }
 
@@ -511,8 +513,8 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `Current password provided do not match!`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "AUTH18",
+        statusCode: 406
       });
     }
 
@@ -521,8 +523,8 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `The new password provided is already used!`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "AUTH19",
+        statusCode: 406
       });
     }
     
@@ -569,14 +571,15 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
       res,
       data: send_email.response,
       msg: "Password change successful",
+      statusCode: 201
     });
   } catch (error) {
     return utils.send_json_error_response({
       res,
       data: [],
       msg: `Password change failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "AUTH20",
+      statusCode: 500
     });
   }
 });

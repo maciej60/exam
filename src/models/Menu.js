@@ -1,8 +1,22 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
 const oSchema = new mongoose.Schema({
-        head: {
+        menuHeaderId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "MenuHeader",
+        },
+        moduleId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Module",
+        },
+        /*menuPath: {
             type: String,
+            trim: true,
+            required: true,
+            unique: true,
         },
         title: {
             type: String,
@@ -23,7 +37,7 @@ const oSchema = new mongoose.Schema({
         icon: {
             type: String,
             trim: true,
-        },
+        },*/
         forSystemAdmin: {
             type: Number,
             default: 0,
@@ -32,8 +46,11 @@ const oSchema = new mongoose.Schema({
             type: Number,
             default: 0,
         },
-        children: Array
+        menuObject: Array
     }
 );
 
-module.exports = mongoose.model('SystemMenu', oSchema, 'system_menus');
+oSchema.plugin(mongoosePaginate);
+oSchema.plugin(aggregatePaginate);
+
+module.exports = mongoose.model('Menu', oSchema, 'menus');

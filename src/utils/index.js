@@ -10,6 +10,7 @@ require("dotenv").config();
 const generator = require('generate-password'); */
 const moment = require("moment"); 
 const { url } = require('inspector');
+const XLSX = require("xlsx");
 const time = new Date(Date.now()).toLocaleString();
 
 function twoDigits(d) {
@@ -142,6 +143,150 @@ module.exports = {
     ];
     return months[d];
   },
+
+  excelToJson: async (fileName) => {
+    const file = XLSX.readFile(fileName);
+    let data = [];
+    const sheets = file.SheetNames;
+    for (let i = 0; i < sheets.length; i++) {
+      const temp = XLSX.utils.sheet_to_json(file.Sheets[file.SheetNames[i]]);
+      temp.forEach((item) => data.push(item));
+    }
+    return data;
+  },
+
+  buildMenu: (main, arr) => {
+    let mainMenu1 = []
+    let mainMenu2 = []
+    let subMenu1 = []
+    let subMenu2 = []
+    let subSubMenu = [];
+    let subSubMenu2 = [];
+    let builtSubMenu = [];
+    let builtMainMenu = [];
+    let builtMenuHeader = [];
+    const finder = (arr, path) => {
+      for (const obj of arr) {
+        if (obj.path === path) return obj;
+      }
+    }
+    // pass main to it, returns the main menu from this whose path is given
+    const findMainHeader = (arr, path) => {
+      for (const obj of arr) {
+        const main = finder(obj.menuObject, path)
+        if(main){
+          if(main.hasOwnProperty("path") && main.path === path) return obj.menuHeaderId.name || false;
+        }
+      }
+      return false;
+    }
+    // pass main to it, returns the main menu from this whose path is given
+    const findMain = (arr, path) => {
+      for (const obj of arr) {
+        const main = finder(obj.menuObject, path);
+        if (main) return main;
+      }
+      return false;
+    }
+    // pass main to it, returns the sub menu from this whose path is given
+    const findSub = (arr, path) => {
+      let mainPath = path.split(".").slice(0,1).join(".")
+      for (const obj of arr) {
+        const main = finder(obj.menuObject, mainPath);
+        if (main) return finder(main.children, path);
+      }
+      return false;
+    }
+    // pass main to it, returns the sub-sub menu from this whose path is given
+    const findSubSub = (arr, path) => {
+      let mainPath = path.split(".").slice(0,1).join(".")
+      let subPath = path.split(".").slice(0,2).join(".")
+      for (const obj of arr) {
+        const main = finder(obj.menuObject, mainPath);
+        if (main) {
+          let sub = finder(main.children, subPath);
+          if(sub) return finder(sub.children, path);
+        }
+      }
+      return false;
+    }
+    _.forEach(arr.menuData,  (u) => {
+      u = u.toString()
+      let match = (u.match(new RegExp(/\./, "g")) || []).length;
+      if(match === 0) {
+        let result1 = findMain(main, u);
+        mainMenu1.push(u)
+        mainMenu2.push(result1)
+      }
+      if(match === 1) {
+        let result2 = findSub(main, u);
+        subMenu1.push(u)
+        subMenu2.push(result2)
+      }
+      if(match === 2) {
+        let result3 = findSubSub(main, u);
+        subSubMenu.push(u)
+        subSubMenu2.push(result3)
+      }
+    });
+    _.forEach(subSubMenu,  (u) => {
+      let subMenuId = u.split(".").slice(0,2).join(".")
+      let ss = finder(subSubMenu2, u)
+      let s = finder(builtSubMenu, subMenuId)
+      if(s){
+        s.children.push(ss)
+      }else{
+        if(subMenu1.indexOf(subMenuId) > -1){
+          let s1 = finder(subMenu2, subMenuId)
+          s1.children = []
+          s1.children.push(ss)
+          builtSubMenu.push({...s1})
+          subMenu2 = _.reject(subMenu2, function(el) { return el.path === subMenuId; });
+        }
+      }
+    });
+    if(subMenu2.length > 0){
+      _.forEach(subMenu2,  (u) => {
+        builtSubMenu.push(u)
+      })
+    }
+    _.forEach(builtSubMenu,  (u) => {
+      let subMenuId = u.path
+      let mainMenuId = u.path.split(".").slice(0,1).join(".")
+      let m = finder(builtMainMenu, mainMenuId)
+      let s = finder(builtSubMenu, subMenuId)
+      if(m){
+        m.children.push(s)
+      }else{
+        if(mainMenu1.indexOf(mainMenuId) > -1){
+          let m1 = finder(mainMenu2, mainMenuId)
+          m1.children = []
+          m1.children.push(s)
+          builtMainMenu.push({...m1})
+          mainMenu2 = _.reject(mainMenu2, function(el) { return el.path === mainMenuId; });
+        }
+      }
+    });
+    if(mainMenu2.length > 0){
+      _.forEach(mainMenu2,  (u) => {
+        builtMainMenu.push(u)
+      })
+    }
+
+    _.forEach(builtMainMenu,  (u) => {
+      let path = u.path;
+      let header = findMainHeader(main, path)
+      let f = builtMenuHeader.find(x => x.header === header)
+      if(f){
+        f.children.push(u)
+      }else{
+        let s = {header, children: [u]}
+        builtMenuHeader.push(s)
+      }
+    })
+    return builtMenuHeader
+  },
+
   pascal_to_underscore: async (str) => {
     if (str.constructor === Array) {
       // if (!Array.isArray(str)) {
@@ -503,8 +648,8 @@ module.exports = {
     return res.status(200).set("Content-Type", "text/plain").send(msg);
   },
 
-  send_json_response: async ({ res, data, msg }) => {
-    return res.status(200).json({
+  send_json_response: async ({ res, data, msg, statusCode=200 }) => {
+    return res.status(statusCode).json({
       status: "success",
       code: "00",
       data: data || [],
@@ -512,7 +657,7 @@ module.exports = {
     });
   },
 
-  send_json_error_response: async ({ res, data, msg, errorCode, statusCode=200 }) => {
+  send_json_error_response: async ({ res, data, msg, errorCode, statusCode=400 }) => {
     await logger.filecheck(
         `ERROR; time: ${time}; message: ${msg}; errorCode: ${errorCode} } \n`
     );

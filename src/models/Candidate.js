@@ -36,7 +36,7 @@ const oSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-        candidateType: {
+        candidateTypeId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
             ref: "CandidateType",
@@ -67,6 +67,11 @@ const oSchema = new mongoose.Schema(
             type: String,
         },
         passwordResets: Array,
+        createdBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "User",
+        },
     },
     { timestamps: true }
 );
@@ -84,10 +89,9 @@ oSchema.pre("save", function (next) {
             lowercase: true,
             symbols: true,
         });
-        let pw_hashed = utils.hashPassword(pw);
-        this.password = pw_hashed;
-        this.passwordResets.push(pw_hashed);
+        this.password = utils.hashPassword(pw);
     }
+    if(this.password) this.passwordResets.push(this.password);
     this.firstName =
         !_.isEmpty(this.firstName) && this.firstName != null
             ? this.firstName.toUpperCase()

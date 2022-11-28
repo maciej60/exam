@@ -8,17 +8,15 @@ const oSchema = new mongoose.Schema({
         institutionId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
+            unique: true,
             ref: "Institution",
         },
-        systemMenuId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "SystemMenu",
-        },
+        menuData: [String],
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },
     }
 );
-
+oSchema.index({ "institutionId": 1}, { "unique": true });
 module.exports = mongoose.model('InstitutionMenu', oSchema, 'institution_menu');

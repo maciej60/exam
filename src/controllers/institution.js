@@ -54,8 +54,8 @@ exports.add = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${subjectPascal} create validation failed with error: ${error.details[0].message}`,
-        errorCode: "E401",
-        statusCode: 200
+        errorCode: "INS01",
+        statusCode: 406
       });
     let createdBy = req.user.id || null;
     let {name, phone, email, address, businessId, logo, modules} = req.body;
@@ -118,14 +118,15 @@ exports.add = asyncHandler(async (req, res, next) => {
       res,
       data: create,
       msg: `${subjectPascal} successfully created, check your mail to create an institution manager.`,
+      statusCode: 201
     });
   } catch (error) {
     return utils.send_json_error_response({
       res,
       data: [],
       msg: `${subjectPascal} create failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "INS02",
+      statusCode: 500
     });
   }
 });
@@ -148,8 +149,8 @@ exports.list = asyncHandler(async (req, res, next) => {
         res,
         data: [],
         msg: `${queryOptions} is not valid!`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "INS03",
+        statusCode: 400
       });
     }
     /**
@@ -191,14 +192,15 @@ exports.list = asyncHandler(async (req, res, next) => {
         res,
         data: obj,
         msg: `${subjectPascal} list successfully fetched`,
+        statusCode: 200
       });
     } else {
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `No record!`,
-        errorCode: "E404",
-        statusCode: 200
+        errorCode: "INS03",
+        statusCode: 404
       });
     }
   } catch (error) {
@@ -206,8 +208,8 @@ exports.list = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `${subjectPascal} list failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "INS05",
+      statusCode: 500
     });
   }
 });
@@ -239,8 +241,8 @@ exports.update = asyncHandler(async (req, res) => {
         res,
         data: [],
         msg: `${subjectPascal} update validation failed with error: ${error.details[0].message}`,
-        errorCode: "E401",
-        statusCode: 200
+        errorCode: "INS06",
+        statusCode: 500
       });
     console.log("begin update")
     const {name, phone, address, email, logo, modules, institutionConfig, id} = req.body;
@@ -260,19 +262,21 @@ exports.update = asyncHandler(async (req, res) => {
         res,
         data: update.result,
         msg: update.message,
-        errorCode: "E401"
+        errorCode: "INS06",
+        statusCode: 500
       });
     return utils.send_json_response({
       res,
       data: update.result,
+      statusCode: 201
     });
   } catch (error) {
     return utils.send_json_error_response({
       res,
       data: [],
       msg: `Error: ${error} `,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "INS07",
+      statusCode: 500
     });
   }
 });
@@ -304,14 +308,15 @@ exports.remove = asyncHandler(async (req, res, next) => {
         res,
         data: del,
         msg: `${subjectPascal} successfully deleted`,
+        statusCode: 200
       });
     }else{
       return utils.send_json_error_response({
         res,
         data: [],
         msg: `${subjectPascal} delete failed`,
-        errorCode: "E501",
-        statusCode: 200
+        errorCode: "INS08",
+        statusCode: 502
       });
     }
   } catch (error) {
@@ -319,8 +324,8 @@ exports.remove = asyncHandler(async (req, res, next) => {
       res,
       data: [],
       msg: `${subjectPascal} delete failed with error ${error.message}`,
-      errorCode: error.errorCode,
-      statusCode: 200
+      errorCode: "INS09",
+      statusCode: 500
     });
   }
 });

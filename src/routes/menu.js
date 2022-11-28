@@ -1,21 +1,19 @@
 const router = require('express').Router();
 const {
-    test,
-    addSystemMenu,
+    addMenu,
     addInstitutionMenu,
     addUserMenu,
-    getSystemMenu,
+    getMenu,
     getInstitutionMenu,
     getUserMenu,
 } = require("../controllers/menu");
 
 const { protect } = require("../middleware/auth");
 
-router.post('/test', test);
-router.post('/addSystemMenu', protect, addSystemMenu);
+router.post('/addMenu', protect, addMenu);
 router.post('/addInstitutionMenu', protect, addInstitutionMenu);
 router.post("/addUserMenu", protect, addUserMenu);
-router.post("/getSystemMenu", protect, getSystemMenu);
+router.post("/getMenu", protect, getMenu);
 router.post("/getInstitutionMenu", protect, getInstitutionMenu);
 router.post("/getUserMenu", protect, getUserMenu);
 

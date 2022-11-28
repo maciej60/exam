@@ -43,8 +43,8 @@ exports.add = asyncHandler(async (req, res, next) => {
                 res,
                 data: [],
                 msg: `Question create validation failed with error: ${error.details[0].message}`,
-                errorCode: "E401",
-                statusCode: 200,
+                errorCode: "QUE01",
+                statusCode: 406,
             });
         let createdBy = req.user.id || null;
         let {
@@ -79,14 +79,15 @@ exports.add = asyncHandler(async (req, res, next) => {
             res,
             data: create,
             msg: `Question successfully created .`,
+            statusCode: 201
         });
     } catch (error) {
         return utils.send_json_error_response({
             res,
             data: [],
             msg: `Question create failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "QUE02",
+            statusCode: 500,
         });
     }
 });
@@ -107,8 +108,8 @@ exports.list = asyncHandler(async (req, res, next) => {
                 res,
                 data: [],
                 msg: `${queryOptions} is not valid!`,
-                errorCode: "E501",
-                statusCode: 200,
+                errorCode: "QUE03",
+                statusCode: 400,
             });
         }
         /**
@@ -156,14 +157,15 @@ exports.list = asyncHandler(async (req, res, next) => {
                 res,
                 data: obj,
                 msg: `Question list successfully fetched`,
+                statusCode: 200
             });
         } else {
             return utils.send_json_error_response({
                 res,
                 data: [],
                 msg: `No record!`,
-                errorCode: "E404",
-                statusCode: 200,
+                errorCode: "QUE04",
+                statusCode: 404,
             });
         }
     } catch (error) {
@@ -171,8 +173,8 @@ exports.list = asyncHandler(async (req, res, next) => {
             res,
             data: [],
             msg: `Question list failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "QUE05",
+            statusCode: 500,
         });
     }
 });
@@ -203,8 +205,8 @@ exports.update = asyncHandler(async (req, res) => {
                 res,
                 data: [],
                 msg: `Question update validation failed with error: ${error.details[0].message}`,
-                errorCode: "E401",
-                statusCode: 200,
+                errorCode: "QUE06",
+                statusCode: 406,
             });
         const {
             institutionId,
@@ -242,19 +244,21 @@ exports.update = asyncHandler(async (req, res) => {
                 res,
                 data: update.result,
                 msg: update.message,
-                errorCode: "E401",
+                errorCode: "QUE07",
+                statusCode: 502
             });
         return utils.send_json_response({
             res,
             data: update.result,
+            statusCode: 201
         });
     } catch (error) {
         return utils.send_json_error_response({
             res,
             data: [],
             msg: `Error: ${error} `,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "QUE08",
+            statusCode: 500,
         });
     }
 });
@@ -286,14 +290,15 @@ exports.remove = asyncHandler(async (req, res, next) => {
                 res,
                 data: del,
                 msg: `Question successfully deleted`,
+                statusCode: 200
             });
         }else{
             return utils.send_json_error_response({
                 res,
                 data: [],
                 msg: `Question delete failed`,
-                errorCode: "E501",
-                statusCode: 200
+                errorCode: "QUE09",
+                statusCode: 502
             });
         }
     } catch (error) {
@@ -301,8 +306,8 @@ exports.remove = asyncHandler(async (req, res, next) => {
             res,
             data: [],
             msg: `Question delete failed with error ${error.message}`,
-            errorCode: error.errorCode,
-            statusCode: 200,
+            errorCode: "QUE10",
+            statusCode: 500,
         });
     }
 });
