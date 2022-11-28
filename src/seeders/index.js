@@ -6,7 +6,8 @@ const utils = require("../utils");
 const logger = require("../utils/logger");
 let appRoot = require("app-root-path");
 const generator = require("generate-password");
-let normalizedPath = appRoot + "/src/models/";
+//let normalizedPath = appRoot + "/src/models/";
+let normalizedPath = "./src/models/";
 
 console.log('seeding started...');
 (async () => {
