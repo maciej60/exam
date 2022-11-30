@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require("mongoose-paginate-v2");
-let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
-const _ = require("lodash");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
 const oSchema = new mongoose.Schema({
         institutionId: {
@@ -14,14 +13,9 @@ const oSchema = new mongoose.Schema({
             required: true,
             ref: "Application",
         },
-        candidateId: {
+        institutionDocumentTypes: [{
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
-            ref: "Candidate",
-        },
-        documents: [{
-            type: String,
-            unique: true
+            ref: "InstitutionDocumentType",
         }],
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
@@ -29,14 +23,9 @@ const oSchema = new mongoose.Schema({
             ref: "User",
         },
     },
-    { timestamps: true }
-);
-/*oSchema.pre('updateOne', function (next) {
-    this.documents = _.uniq(this.documents);
-    next();
-});*/
-oSchema.index({ "applicationId": 1, "institutionId": 1, "candidateId": 1}, { "unique": true });
+    { timestamps: true });
+oSchema.index({ "institutionId": 1, "applicationId": 1}, { "unique": true });
 
 oSchema.plugin(mongoosePaginate);
 oSchema.plugin(aggregatePaginate);
-module.exports = mongoose.model('CandidateDocument', oSchema, 'candidate_documents');
+module.exports = mongoose.model('ApplicationDocumentType', oSchema, 'application_document_types');

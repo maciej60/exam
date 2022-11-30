@@ -127,6 +127,12 @@ exports.list = asyncHandler(async (req, res, next) => {
         if (req.body.hasOwnProperty("status")) {
             where.status = parseInt(req.body.status);
         }
+        if (!_.isEmpty(req.body.name) && req.body.name) {
+            where.name = {
+                $regex: ".*" + req.body.name + ".*",
+                $options: "i",
+            };
+        }
         if (!_.isEmpty(req.body.institutionId) && req.body.institutionId) {
             where.institutionId = new ObjectId(req.body.institutionId);
         }

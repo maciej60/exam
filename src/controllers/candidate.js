@@ -454,8 +454,11 @@ exports.remove = asyncHandler(async (req, res, next) => {
   }
 });
 
-// Mass upload
-
+/**
+ * @desc Candidate mass upload
+ * @route POST /api/v2/candidate/importCandidate
+ * @access PUBLIC
+ */
 exports.importCandidate = asyncHandler(async (req, res, next) => {
   let email_log_data;
   try {
@@ -613,3 +616,238 @@ exports.importCandidate = asyncHandler(async (req, res, next) => {
   }
 });
 
+/**
+ * @desc Upload Candidate Documents
+ * @route POST /api/v2/candidate/uploadDocument
+ * @access PUBLIC
+ */
+exports.uploadDocument = asyncHandler(async (req, res, next) => {
+  try {
+    let createdBy = req.user.id || null;
+    const validationSchema = Joi.object({
+      candidateId: Joi.string(),
+      institutionId: Joi.string(),
+      applicationId: Joi.string(),
+    });
+    const { error } = validationSchema.validate(req.body);
+    if (error)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Candidate upload failed with validation error ${error.details[0].message}`,
+        errorCode: "E501",
+        statusCode: 406,
+      });
+    /**
+     * assemble candidate params for update
+     */
+    let {
+      candidateId,
+      institutionId,
+      applicationId,
+    } = req.body;
+    const ObjectId = require("mongoose").Types.ObjectId;
+    const record = await helper.CandidateHelper.getCandidate({ _id: new ObjectId(candidateId) });
+    if (!record) {
+      return utils.send_json_error_response({
+        res,
+        data: {},
+        msg: "Record not found",
+        errorCode: "E401",
+        statusCode: 404
+      });
+    }
+    console.log("files",req.files)
+    if(_.isEmpty(req.files)){
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Candidate documents not uploaded or empty`,
+        errorCode: "E501",
+        statusCode: 501,
+      });
+    }
+    let f = []
+    _.forEach(req.files, (u) => {
+      f.push(u.filename)
+    })
+    let candidate_data = {
+      candidateId,
+      institutionId,
+      applicationId,
+      documents: f,
+      createdBy
+    };
+    let result = await helper.CandidateHelper.uploadCandidateDocuments({
+      filter: {
+        institutionId: new ObjectId(institutionId),
+        applicationId: new ObjectId(applicationId),
+        candidateId: new ObjectId(candidateId),
+      },
+      create: candidate_data,
+      update: { $addToSet: { documents: f } },
+      options: { upsert: true, new: true },
+    });
+    if(result){
+      await logger.filecheck(
+          `INFO: Candidate documents uploaded : by ${createdBy} at ${time} with data ${JSON.stringify(
+              result
+          )} \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: result,
+        msg: "Candidate documents successfully uploaded",
+        statusCode: 201
+      });
+    } else {
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Candidate documents not created`,
+        errorCode: "E501",
+        statusCode: 501,
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Candidate documents failed with error ${error.message}`,
+      errorCode: error.errorCode,
+      statusCode: 500,
+    });
+  }
+});
+
+/**
+ * @desc list Candidate documents
+ * @route GET /api/v2/candidate/listDocument
+ * @access Institution User
+ */
+exports.listDocument = asyncHandler(async (req, res, next) => {
+  try {
+    //let createdBy = req.user.id;
+    if (_.isEmpty(req.query)) {
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Provide query params like sort, page and per_page!`,
+        errorCode: "E501",
+        statusCode: 200,
+      });
+    }
+    const ObjectId = require("mongoose").Types.ObjectId;
+    let where = {};
+    if (!_.isEmpty(req.body.institutionId) && req.body.institutionId) {
+      where.institutionId = new ObjectId(req.body.institutionId);
+    }
+    if (!_.isEmpty(req.body.candidateId) && req.body.candidateId) {
+      where.candidateId = new ObjectId(req.body.candidateId);
+    }
+    if (!_.isEmpty(req.body.applicationId) && req.body.applicationId) {
+      where.applicationId = new ObjectId(req.body.applicationId);
+    }
+    /**
+     * build query options for mongoose-paginate
+     */
+    const queryOptions = await utils.buildQueryOptions(req.query);
+    if (typeof queryOptions === "string") {
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `${queryOptions} is not valid!`,
+        errorCode: "E501",
+        statusCode: 406,
+      });
+    }
+    /**
+     * fetch paginated data using queryOptions
+     */
+    const objWithoutMeta = await helper.CandidateHelper.getCandidateDocuments({
+      where,
+      queryOptions,
+    });
+    if (objWithoutMeta.data && !_.isEmpty(objWithoutMeta.data)) {
+      /**
+       * build response data meta for pagination
+       */
+      let url = req.protocol + "://" + req.get("host") + req.originalUrl;
+      const obj = await utils.buildResponseMeta({ url, obj: objWithoutMeta });
+      await logger.filecheck(
+          `INFO: Candidates documents list by:, at ${time} with data ${JSON.stringify(
+              obj
+          )} \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: obj,
+        msg: "Candidate documents list successfully fetched",
+      });
+    } else {
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `No record!`,
+        errorCode: "E404",
+        statusCode: 404,
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Candidate documents list failed with error ${error.message}`,
+      errorCode: error.errorCode,
+      statusCode: 500,
+    });
+  }
+});
+
+/**
+ * @desc Candidate removeDocument
+ * @route POST /api/v2/candidate/removeDocument
+ * @access PUBLIC
+ */
+exports.removeDocument = asyncHandler(async (req, res, next) => {
+  try {
+    let deletedBy = req.user.id;
+    let { ids } = req.body;
+    let model = "CandidateDocument";
+    const ObjectId = require("mongoose").Types.ObjectId;
+    ids.map((d) => new ObjectId(d));
+    let del = await helper.backupAndDelete({
+      ids,
+      deletedBy,
+      model,
+    });
+    if (del.deletedCount >= 1) {
+      await logger.filecheck(
+          `INFO: Candidate document deleted: by ${deletedBy} at ${time} with data ${JSON.stringify(
+              del
+          )} \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: del,
+        msg: `Candidate document successfully deleted`,
+      });
+    } else {
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Candidate document delete failed`,
+        errorCode: "E501",
+        statusCode: 200,
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Candidate document delete failed with error ${error.message}`,
+      errorCode: error.errorCode,
+      statusCode: 200,
+    });
+  }
+});

@@ -5,10 +5,12 @@ const moment = require("moment");
 const strings = require("locutus/php/strings");
 const Candidate = require("../../models/Candidate");
 const CandidateType = require("../../models/CandidateType");
+const CandidateDocument = require("../../models/CandidateDocument");
 const User = require("../../models/User");
 const utils = require("../");
 const { is_null } = require("locutus/php/var");
 const Institution = require("../../models/Institution");
+const InstitutionDocumentType = require("../../models/InstitutionDocumentType");
 const time = new Date(Date.now()).toLocaleString();
 
 async function generateCandidateCode(append = "", prepend = "") {
@@ -136,4 +138,97 @@ module.exports = {
     }
     return { result, message: "successful" };
   },
+
+  uploadCandidateDocuments: async ({
+                           filter: filter,
+                           create: create,
+                           update: update,
+                           options: options,
+                         }) => {
+    let res;
+    let c = await CandidateDocument.findOne(filter);
+    if (!c) {
+      res = await CandidateDocument.create(create);
+    } else {
+      res = await CandidateDocument.findOneAndUpdate(filter, update, options);
+    }
+    return res.toObject();
+  },
+
+  getCandidateDocuments: async (params) => {
+    const { where, queryOptions } = params;
+    const options = {
+      ...queryOptions,
+    };
+    const v = CandidateDocument.aggregate([
+      {
+        $match: where,
+      },
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: "institutions",
+          localField: "institutionId",
+          foreignField: "_id",
+          as: "institution",
+        },
+      },
+      { $unwind: "$institution" },
+      {
+        $lookup: {
+          from: "applications",
+          localField: "applicationId",
+          foreignField: "_id",
+          as: "application",
+        },
+      },
+      { $unwind: "$application" },
+      {
+        $lookup: {
+          from: "candidates",
+          localField: "candidateId",
+          foreignField: "_id",
+          as: "candidate",
+        },
+      },
+      { $unwind: "$candidate" },
+      {
+        $project: {
+          __v: 0,
+          "institution.address": 0,
+          "institution._id": 0,
+          "institution.institutionConfig": 0,
+          "institution.logo": 0,
+          "institution.businessId": 0,
+          "institution.modules": 0,
+          "institution.createdAt": 0,
+          "institution.updatedAt": 0,
+          "application.createdAt": 0,
+          "application.updatedAt": 0,
+          "candidate.password": 0,
+          "candidate.passwordResets": 0,
+          "candidate._id": 0,
+          "candidate.firstLogin": 0,
+          "candidate.userPermission": 0,
+          "candidate.isSystemAdmin": 0,
+          "candidate.isInstitutionAdmin": 0,
+          "candidate.isLmsAdmin": 0,
+          "candidate.createdAt": 0,
+          "candidate.updatedAt": 0,
+        },
+      },
+    ]);
+    return CandidateDocument.aggregatePaginate(v, options, function (err, results) {
+      if (err) {
+        console.log(err);
+      } else {
+        return results;
+      }
+    });
+  },
+
+
+
+
+
 };

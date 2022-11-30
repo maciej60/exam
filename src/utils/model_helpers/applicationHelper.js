@@ -9,6 +9,8 @@ const ApplicationUserPermission = require("../../models/ApplicationUserPermissio
 const User = require("../../models/User");
 const utils = require("../");
 const {is_null} = require("locutus/php/var");
+const ApplicationDocumentType = require("../../models/ApplicationDocumentType");
+const InstitutionDocumentType = require("../../models/InstitutionDocumentType");
 const time = new Date(Date.now()).toLocaleString();
 
 module.exports = {
@@ -294,7 +296,127 @@ module.exports = {
     });
   },
 
+  createApplicationDocumentType: async (data) => {
+    return ApplicationDocumentType.create(data);
+  },
 
+  getApplicationDocumentTypes: async (params) => {
+    const { where, queryOptions } = params;
+    const options = {
+      ...queryOptions,
+    };
+    const v = ApplicationDocumentType.aggregate([
+      {
+        $match: where,
+      },
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: "institutions",
+          localField: "institutionId",
+          foreignField: "_id",
+          as: "institution",
+        },
+      },
+      { $unwind: "$institution" },
+      {
+        $lookup: {
+          from: "applications",
+          localField: "applicationId",
+          foreignField: "_id",
+          as: "application",
+        },
+      },
+      { $unwind: "$application" },
+      {
+        $lookup: {
+          from: "institution_document_types",
+          localField: "institutionDocumentTypes",
+          foreignField: "_id",
+          as: "docTypes",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "creator",
+        },
+      },
+      { $unwind: "$creator" },
+      {
+        $project: {
+          __v: 0,
+          createdAt: 0,
+          updatedAt: 0,
+          createdBy: 0,
+          institutionId: 0,
+          applicationId: 0,
+          institutionDocumentTypes: 0,
+          "institution.address": 0,
+          "institution._id": 0,
+          "institution.institutionConfig": 0,
+          "institution.logo": 0,
+          "institution.businessId": 0,
+          "institution.modules": 0,
+          "application.createdAt": 0,
+          "application.updatedAt": 0,
+          "application._id": 0,
+          "creator.password": 0,
+          "creator.passwordResets": 0,
+          "creator._id": 0,
+          "creator.firstLogin": 0,
+          "creator.userPermission": 0,
+          "creator.isSystemAdmin": 0,
+          "creator.isInstitutionAdmin": 0,
+          "creator.isLmsAdmin": 0,
+          "creator.createdAt": 0,
+          "creator.updatedAt": 0,
+          "docTypes._id": 0,
+          "docTypes.createdAt": 0,
+          "docTypes.updatedAt": 0,
+          "docTypes.institutionId": 0,
+          "docTypes.createdBy": 0,
+        },
+      },
+    ]);
+    return ApplicationDocumentType.aggregatePaginate(v, options, function (err, results) {
+      if (err) {
+        console.log(err);
+      } else {
+        return results;
+      }
+    });
+  },
+
+  getApplicationDocumentType: async (where) => {
+    return ApplicationDocumentType.find(where)
+        .populate({path: 'institutionId'})
+        .populate({path: 'applicationId'})
+        .populate({path: 'institutionDocumentTypes'})
+        .populate({path: 'createdBy'});
+  },
+
+  updateApplicationDocumentType: async ({
+                                          filter: filter,
+                                          update: update,
+                                          options: options,
+                                        }) => {
+    let res;
+    let result;
+    let check = await ApplicationDocumentType.findOne(filter);
+    if (!check || is_null(check)) {
+      return {result: false, message: "Application provided do not exist"};
+    } else {
+      res = await ApplicationDocumentType.findOneAndUpdate(filter, update, options);
+    }
+    result = res.toObject();
+    if (result) {
+      result.id = result._id;
+    }
+    return { result, message: "successful" };
+  },
 
 
 

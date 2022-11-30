@@ -924,3 +924,241 @@ exports.test = asyncHandler(async (req, res, next) => {
   }
 });
 
+/**
+ * @desc ApplicationDocumentType
+ * @route POST /api/v2/application/addDocType
+ * @access Institution admin
+ */
+exports.addDocType = asyncHandler(async (req, res, next) => {
+  let createdBy = req.user.id || null;
+  let validationSchema;
+  try {
+    /**
+     * validate request body
+     * @type {Joi.ObjectSchema<any>}
+     */
+    validationSchema = Joi.object({
+      institutionId: Joi.string(),
+      applicationId: Joi.string(),
+      institutionDocumentTypes: Joi.array(),
+    });
+    const { error } = validationSchema.validate(req.body);
+    if (error)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `${subjectPascal} document type create validation failed with error: ${error.details[0].message}`,
+        errorCode: "SUBO1",
+        statusCode: 406,
+      });
+    let { applicationId, institutionDocumentTypes, institutionId } = req.body;
+    const ObjectId = require("mongoose").Types.ObjectId;
+    subjectContainer = {
+      institutionDocumentTypes,
+      applicationId,
+      createdBy,
+      institutionId,
+    };
+    const create = await helper.ApplicationHelper.createApplicationDocumentType(subjectContainer);
+    await logger.filecheck(
+        `INFO: ${subjectPascal}: document type created by ${createdBy}: at ${time} with data ${JSON.stringify(
+            create
+        )} \n`
+    );
+    return utils.send_json_response({
+      res,
+      data: create,
+      msg: `${subjectPascal} document type successfully created.`,
+      statusCode: 201
+    });
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `${subjectPascal} document type create failed with error ${error.message}, code: ${error.errorCode}`,
+      errorCode: "SUBO2",
+      statusCode: 502,
+    });
+  }
+});
+
+/**
+ * @desc ApplicationDocumentType
+ * @route POST /api/v2/application/updateDocType
+ * @access Institution admin
+ */
+exports.listDocType = asyncHandler(async (req, res, next) => {
+  try {
+    let createdBy = req.user.id || null;
+    /**
+     * build query options for mongoose-paginate
+     */
+    const queryOptions = await utils.buildQueryOptions(req.query);
+    if (typeof queryOptions === "string") {
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `${queryOptions} is not valid!`,
+        errorCode: "SUBO3",
+        statusCode: 400,
+      });
+    }
+    /**
+     * fetch paginated data using queryOptions
+     */
+    const ObjectId = require("mongoose").Types.ObjectId;
+    let where = {};
+    if (!_.isEmpty(req.body.institutionId) && req.body.institutionId) {
+      where.institutionId = new ObjectId(req.body.institutionId);
+    }
+    if (!_.isEmpty(req.body.applicationId) && req.body.applicationId) {
+      where.applicationId = new ObjectId(req.body.applicationId);
+    }
+    const objWithoutMeta = await helper.ApplicationHelper.getApplicationDocumentTypes({
+      where,
+      queryOptions,
+    });
+    if (objWithoutMeta.data && !_.isEmpty(objWithoutMeta.data)) {
+      /**
+       * build response data meta for pagination
+       */
+      let url = req.protocol + "://" + req.get("host") + req.originalUrl;
+      const obj = await utils.buildResponseMeta({ url, obj: objWithoutMeta });
+      await logger.filecheck(
+          `INFO: ${subjectPascal} document type list by: ${createdBy}, at ${time} with data ${JSON.stringify(
+              obj
+          )} \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: obj,
+        msg: `${subjectPascal} document type list successfully fetched`,
+        statusCode: 200
+      });
+    } else {
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `No record!`,
+        errorCode: "SUBO4",
+        statusCode: 400,
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `${subjectPascal} document type list failed with error ${error.message}`,
+      errorCode: "SUBO5",
+      statusCode: 500,
+    });
+  }
+});
+
+/**
+ * @desc ApplicationDocumentType
+ * @route POST /api/v2/application/updateDocType
+ * @access Institution admin
+ */
+exports.updateDocType = asyncHandler(async (req, res) => {
+  let createdBy = req.user.id;
+  let validationSchema;
+  try {
+    validationSchema = Joi.object({
+      institutionDocumentTypes: Joi.array(),
+      id: Joi.string(),
+    });
+    const { error } = validationSchema.validate(req.body);
+    if (error)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `${subjectPascal} document type update validation failed with error: ${error.details[0].message}`,
+        errorCode: "SUBO6",
+        statusCode: 406,
+      });
+    const { institutionDocumentTypes, id } = req.body;
+    const data = { institutionDocumentTypes, createdBy };
+    const ObjectId = require("mongoose").Types.ObjectId;
+    const update = await helper.ApplicationHelper.updateApplicationDocumentType({
+      filter: {
+        _id: new ObjectId(id),
+      },
+      update: {
+        $set: data,
+      },
+      options: { upsert: true, new: true },
+    });
+    if (!update.result)
+      return utils.send_json_error_response({
+        res,
+        data: update.result,
+        msg: update.message,
+        errorCode: "SUBO7",
+        statusCode: 502
+      });
+    return utils.send_json_response({
+      res,
+      data: update.result,
+      statusCode: 201
+    });
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Error: ${error} `,
+      errorCode: "SUBO8",
+      statusCode: 500,
+    });
+  }
+});
+
+/**
+ * @desc ApplicationDocumentType
+ * @route POST /api/v2/application/deleteDocType
+ * @access Institution admin
+ */
+exports.removeDocType = asyncHandler(async (req, res, next) => {
+  try {
+    let deletedBy = req.user.id;
+    let { ids } = req.body;
+    let model = "ApplicationDocumentType";
+    const ObjectId = require("mongoose").Types.ObjectId;
+    ids.map((d) => new ObjectId(d));
+    let del = await helper.backupAndDelete({
+      ids,
+      deletedBy,
+      model,
+    });
+    if(del.deletedCount >= 1){
+      await logger.filecheck(
+          `INFO: ${subjectPascal} document type deleted: by ${deletedBy} at ${time} with data ${JSON.stringify(
+              del
+          )} \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: del,
+        msg: `${subjectPascal} document type successfully deleted`,
+        statusCode: 200
+      });
+    }else{
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `${subjectPascal} document type delete failed`,
+        errorCode: "SUBO9",
+        statusCode: 501
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `${subjectPascal} document type delete failed with error ${error.message}`,
+      errorCode: "SUB10",
+      statusCode: 500,
+    });
+  }
+});
+

@@ -81,6 +81,7 @@ exports.login = asyncHandler(async (req, res, next) => {
  */
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
+  let sms_log_data;
   try {
 
     /**
@@ -98,7 +99,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     /**
      * destructure the request body and pick the needed params
      */
-    const { login, reset_url } = req.body;
+    const {login, reset_url} = req.body;
     if (!login) {
       return utils.send_json_error_response({
         res,
@@ -108,17 +109,15 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
-
     /**
      * do validation, if it fails log and return response to user,else proceed and start processing
      */
     const validation = validate(
-      {
-        login,
-      },
-      constraints
+        {
+          login,
+        },
+        constraints
     );
-
     if (validation) {
       /**
        * validation fails
@@ -136,13 +135,12 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
-
     let isEmail, isPhone = false;
-    let check_user = await helper.UserHelper.getUser({ email: login });
+    let check_user = await helper.UserHelper.getUser({email: login});
     if (check_user) {
       isEmail = true;
-    }else{
-      check_user = await helper.UserHelper.getUser({ phone: login });
+    } else {
+      check_user = await helper.UserHelper.getUser({phone: login});
       if (check_user) {
         isPhone = true;
       }
@@ -163,7 +161,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     /**
      * begin send sms
      */
-    if(isPhone){
+    if (isPhone) {
       phone = login;
       console.log(`*** begin sms sending ***`);
       let to = phone;
@@ -174,10 +172,10 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         message,
       });
       if (
-        sender.response.StatusCode == "101" ||
-        sender.response.StatusCode == "102" ||
-        sender.response.StatusCode == "100" ||
-        sender.response.Status == "Success"
+          sender.response.StatusCode === "101" ||
+          sender.response.StatusCode === "102" ||
+          sender.response.StatusCode === "100" ||
+          sender.response.Status === "Success"
       ) {
         success = 1;
       }
@@ -188,7 +186,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         smsLogStatus: success,
       };
       const create_sms_log = await helper.SmsLogHelper.createSmsLog(
-        sms_log_data
+          sms_log_data
       );
       console.log(`*** smslog added ***`);
     }
@@ -202,9 +200,9 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
       let emailParams = {
         heading: `Forgot Password`,
         previewText:
-          "Tiwo Exam Portal is awesome!",
+            "Tiwo Exam Portal is awesome!",
         message:
-          "This exam portal is designed to help institutions conduct quiz.",
+            "This exam portal is designed to help institutions conduct quiz.",
         url: url,
         url_text: reset_url,
       };
@@ -225,11 +223,10 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         emailLogStatus: success,
       };
       const create_email_log = await helper.EmailLogHelper.createEmailLog(
-        email_log_data
+          email_log_data
       );
-       console.log(`*** emailLog created ***`);
+      console.log(`*** emailLog created ***`);
     }
-    
     return utils.send_json_response({
       res,
       data: sender.response,
@@ -255,7 +252,6 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   try {
-
     /**
      * build constraints for validate.js
      */
@@ -276,7 +272,6 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
      * destructure the request body and pick the needed params
      */
     let { password, resetPasswordCode } = req.body;
-
     /**
      * do validation, if it fails log and return response to user,else proceed and start processing
      */
@@ -286,7 +281,6 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
       },
       constraints
     );
-
     if (validation) {
       /**
        * validation fails
@@ -304,7 +298,6 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
-
     if (!(await utils.passwordPolicyPassed(password))) {
       return utils.send_json_error_response({
         res,
@@ -314,7 +307,6 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     }
-
     const ObjectId = require("mongoose").Types.ObjectId;
     if (!ObjectId.isValid(resetPasswordCode)) {
       return utils.send_json_error_response({
@@ -325,7 +317,6 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
         statusCode: 404
       });
     }
-
     let user_id = new ObjectId(resetPasswordCode);
     const check_user = await helper.UserHelper.getUser({
       _id: user_id,
@@ -340,7 +331,6 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
         statusCode: 404
       });
     }
-
     let old_password = check_user.password;
     let passwordResets = check_user.passwordResets;
     if (await utils.passwordResetMatches(passwordResets, password)) {
@@ -352,14 +342,12 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     }
-    
     password = await utils.hashPassword(password);
     const save_password_reset = await helper.UserHelper.savePasswordReset({
       user_id,
       old_password,
       new_password: password
     });
-
     /**
      * begin email send
      */
@@ -394,7 +382,6 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
       email_log_data
     );
     console.log(`*** emaillog added ***`);
-
     return utils.send_json_response({
       res,
       data: send_email.response,
@@ -414,14 +401,13 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 });
 
 /**
- * @desc resetPassword module
- * @route POST /api/v2/auth/resetPassword
+ * @desc changePassword module
+ * @route POST /api/v2/auth/changePassword
  * @access PUBLIC
  */
 
 exports.changePassword = asyncHandler(async (req, res, next) => {
   try {
-
     /**
      * build constraints for validate.js
      */
@@ -442,7 +428,6 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
      * destructure the request body and pick the needed params
      */
     let { password, currentPassword, user_id } = req.body;
-
     /**
      * do validation, if it fails log and return response to user,else proceed and start processing
      */
@@ -452,7 +437,6 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
       },
       constraints
     );
-
     if (validation) {
       /**
        * validation fails
@@ -470,7 +454,6 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
-
     if (!(await utils.passwordPolicyPassed(password))) {
       return utils.send_json_error_response({
         res,
@@ -480,7 +463,6 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     }
-
     const ObjectId = require("mongoose").Types.ObjectId;
     if (!ObjectId.isValid(user_id)) {
       return utils.send_json_error_response({
@@ -504,7 +486,6 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
         statusCode: 404
       });
     }
-
     let old_password = check_user.password;
     let passwordResets = check_user.passwordResets;
 
@@ -517,7 +498,6 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     }
-
     if (await utils.passwordResetMatches(passwordResets, password)) {
       return utils.send_json_error_response({
         res,
@@ -527,14 +507,12 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     }
-    
     password = await utils.hashPassword(password);
     const save_password_reset = await helper.UserHelper.savePasswordReset({
       user_id,
       old_password,
       new_password: password
     });
-
     let email = check_user.email;
     let success = 0;
     let subject = "Change Password";
@@ -545,7 +523,6 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
       message: "Your password is successfully changed, kindly login and proceed.",
     };
     let template = emailTemplate.changePassword(emailParams);
-
     let p = {
       to: email,
       message: template,
@@ -565,8 +542,7 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
     const create_email_log = await helper.EmailLogHelper.createEmailLog(
       email_log_data
     );
-    console.log(`*** emaillog added ***`);
-
+    console.log(`*** email-log added ***`);
     return utils.send_json_response({
       res,
       data: send_email.response,
