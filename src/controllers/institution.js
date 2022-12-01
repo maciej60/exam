@@ -14,6 +14,7 @@ const Institution = require("../models/Institution");
 require("dotenv").config();
 let appRoot = require("app-root-path");
 let emailTemplate = require(`${appRoot}/src/utils/emailTemplate`);
+const path = require("path");
 
 let subjectPascal = "Institution";
 let subjectCamel = "institution";
@@ -244,8 +245,10 @@ exports.update = asyncHandler(async (req, res) => {
         statusCode: 500
       });
     console.log("begin update")
+    const filePath = path.normalize(req.file.path);
+    const fileName = path.basename(filePath).toLocaleLowerCase();
     const {name, phone, address, email, logo, modules, institutionConfig, id} = req.body;
-    const data = {name, phone, address, email, logo, modules, institutionConfig};
+    const data = {name, phone, address, email, logo: fileName, modules, institutionConfig};
     const ObjectId = require("mongoose").Types.ObjectId;
     const update = await subjectHelperUpdate({
       filter: {

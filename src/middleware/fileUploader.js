@@ -71,6 +71,23 @@ async function access(req, action){
       return false;
     }
   }
+  if (action === "institutionLogo") {
+    if (req.body.id) {
+      let institution = await helper.InstitutionHelper.getInstitution({
+        _id: new ObjectId(req.body.id),
+      });
+      if (institution) {
+        institution = institution[0];
+        institutionCode = institution.institutionCode;
+        dir = `${appRoot}/public/uploads/institutions/${institutionCode}/logo`;
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
   return false;
 }
 
@@ -297,6 +314,61 @@ module.exports = {
     },
     limits: {
       fileSize: 10 * 1024 * 1024,
+    },
+  }),
+
+  uploadInstitutionLogo: multer({
+    storage: multer.diskStorage({
+      destination: async (req, file, cb) => {
+        let paramsInitialized = await access(req, "institutionLogo");
+        if (!paramsInitialized) {
+          msg = `Params to initialize store not present!`;
+          cb(null, false);
+          return msg;
+        }
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+      },
+      filename: async (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLocaleLowerCase();
+        cb(null, `${institutionCode.toLocaleLowerCase()}${ext}`);
+      },
+    }),
+    fileFilter: async function (req, file, cb) {
+      const types = /png|jpg|jpeg|webp|gif|svg/;
+      const extName = types.test(
+          path.extname(file.originalname).toLocaleLowerCase()
+      );
+      const mimetype = types.test(file.mimetype);
+      if (extName) {
+        if (mimetype) {
+          if (file.fieldname === "institutionLogo") {
+            if (!req.body.id) {
+              msg = `Logo not provided, please re-arrange the body params to come before file`;
+              cb(null, false);
+              return msg;
+            }
+            cb(null, true);
+          } else {
+            msg = `File field name is not correct`;
+            cb(null, false);
+            return msg;
+          }
+        } else {
+          msg = `Upload an image file`;
+          cb(null, false);
+          return msg;
+        }
+      } else {
+        msg = "Only supported png,jpeg,jpg,gif and svg format image";
+        cb(null, false);
+        return msg;
+      }
+    },
+    limits: {
+      fileSize: 1024 * 1024,
     },
   }),
 
