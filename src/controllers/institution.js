@@ -32,7 +32,7 @@ let subjectHelperUpdate = helper.InstitutionHelper.findUpdate;
  * @param ?e00987TE4=code this contains the institutionCode for creating admin
  */
 exports.add = asyncHandler(async (req, res, next) => {
-  let sender;
+  let sender, createdBy;
   let validationSchema;
   try {
     /**
@@ -59,7 +59,7 @@ exports.add = asyncHandler(async (req, res, next) => {
         errorCode: "INS01",
         statusCode: 406
       });
-    let createdBy = req.user.id || null;
+    if(req.user) createdBy = req.user.id || null;
     let {name, phone, email, address, businessId, logo, modules, admin_url} = req.body;
     const ObjectId = require("mongoose").Types.ObjectId;
     let subjectContainer = {
