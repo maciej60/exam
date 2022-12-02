@@ -5,7 +5,7 @@ const {
 } = require("../controllers/user");
 const { protect } = require("../middleware/auth");
 
-router.post("/add", protect, addAdmin);
+router.post("/add", addAdmin);
 router.post("/update", protect, updateAdmin);
 
 module.exports = router;

@@ -52,7 +52,9 @@ exports.login = asyncHandler(async (req, res, next) => {
     });
   }
   const get_user = await helper.UserHelper.getUser(check_user._id);
-  const get_menu = await helper.MenuHelper.getUserMenu({userId: check_user._id});
+  const obj = await helper.MenuHelper.getUserMenu({userId: check_user._id});
+  const main = await helper.MenuHelper.getMenu({});
+  const build = utils.buildMenu(main, obj)
   if (check_user.firstLogin === 1) {
     utils.sendNoTokenResponse(
         get_user,
@@ -71,7 +73,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   if (check_user.isLmsAdmin === 1) {
 
   }
-  utils.sendTokenResponse({user: get_user, menu: get_menu}, 200, res, "User login successful");
+  utils.sendTokenResponse({user: get_user, menu: build}, 200, res, "User login successful");
 });
 
 /**
@@ -82,6 +84,7 @@ exports.login = asyncHandler(async (req, res, next) => {
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   let sms_log_data;
+  let phone;
   try {
 
     /**
