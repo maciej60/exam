@@ -52,9 +52,9 @@ exports.login = asyncHandler(async (req, res, next) => {
     });
   }
   const get_user = await helper.UserHelper.getUser(check_user._id);
-  const obj = await helper.MenuHelper.getUserMenu({userId: check_user._id});
+  /*const obj = await helper.MenuHelper.getUserMenu({userId: check_user._id});
   const main = await helper.MenuHelper.getMenu({});
-  const build = utils.buildMenu(main, obj)
+  const build = utils.buildMenu(main, obj)*/
   if (check_user.firstLogin === 1) {
     utils.sendNoTokenResponse(
         get_user,
@@ -73,7 +73,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   if (check_user.isLmsAdmin === 1) {
 
   }
-  utils.sendTokenResponse({user: get_user, menu: build}, 200, res, "User login successful");
+  utils.sendTokenResponse({user: get_user}, 200, res, "User login successful");
 });
 
 /**
@@ -157,6 +157,10 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         statusCode: 404
       });
     }
+    /**
+     * modify the reset link to generate a random token and tie it to the userID so that yoy don't send
+     * same link
+     */
     let sender;
     let user_id = check_user._id;
     let url = reset_url + "?e0779Binary=" + user_id;

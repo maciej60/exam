@@ -309,6 +309,14 @@ exports.getUserMenu = asyncHandler(async (req, res, next) => {
       });
     }
     const obj = await helper.MenuHelper.getUserMenu({userId});
+    if(!obj)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "Menu not available",
+        errorCode: "MEN17",
+        statusCode: 404
+      });
     const main = await helper.MenuHelper.getMenu({});
     const build = utils.buildMenu(main, obj)
     if(obj){
