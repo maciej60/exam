@@ -502,6 +502,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
 exports.listUsers = asyncHandler(async (req, res, next) => {
   try{
     let createdBy = req.user.id;
+    const ObjectId = require("mongoose").Types.ObjectId;
     if (_.isEmpty(req.query)) {
       return utils.send_json_error_response({
         res,
@@ -511,47 +512,51 @@ exports.listUsers = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
-    let phone, email, name, status, isInstitutionAdmin, isLmsAdmin, isSystemAdmin, dateTo, dateFrom;
+    let phone, email, name, status, institutionId, isInstitutionAdmin, isLmsAdmin, isSystemAdmin, dateTo, dateFrom;
     let where = {};
-    if (!_.isEmpty(req.query.isSystemAdmin) && req.query.isSystemAdmin) {
-      isSystemAdmin = parseInt(req.query.isSystemAdmin);
+    if (!_.isEmpty(req.body.isSystemAdmin) && req.body.isSystemAdmin) {
+      isSystemAdmin = parseInt(req.body.isSystemAdmin);
       where.isSystemAdmin = isSystemAdmin;
     }
-    if (!_.isEmpty(req.query.isLmsAdmin) && req.query.isLmsAdmin) {
-      isLmsAdmin = parseInt(req.query.isLmsAdmin);
+    if (!_.isEmpty(req.body.institutionId) && req.body.institutionId) {
+      institutionId = new ObjectId(req.body.institutionId);
+      where.institutionId = institutionId;
+    }
+    if (!_.isEmpty(req.body.isLmsAdmin) && req.body.isLmsAdmin) {
+      isLmsAdmin = parseInt(req.body.isLmsAdmin);
       where.isLmsAdmin = isLmsAdmin;
     }
-    if (!_.isEmpty(req.query.isInstitutionAdmin) && req.query.isInstitutionAdmin) {
-      isInstitutionAdmin = parseInt(req.query.isInstitutionAdmin);
+    if (!_.isEmpty(req.body.isInstitutionAdmin) && req.body.isInstitutionAdmin) {
+      isInstitutionAdmin = parseInt(req.body.isInstitutionAdmin);
       where.isInstitutionAdmin = isInstitutionAdmin;
     }
-    if (!_.isEmpty(req.query.phone) && req.query.phone) {
-      phone = req.query.phone;
+    if (!_.isEmpty(req.body.phone) && req.body.phone) {
+      phone = req.body.phone;
       where.phone = phone;
     }
-    if (!_.isEmpty(req.query.email) && req.query.email) {
-      email = req.query.email;
+    if (!_.isEmpty(req.body.email) && req.body.email) {
+      email = req.body.email;
       where.email = email;
     }
-    if (!_.isEmpty(req.query.name) && req.query.name) {
-      name = req.query.name;
+    if (!_.isEmpty(req.body.name) && req.body.name) {
+      name = req.body.name;
       where.userName = {
         $regex: ".*" + name + ".*",
         $options: "i",
       };
     }
-    if (!_.isEmpty(req.query.status) && req.query.status) {
-      status = parseInt(req.query.status);
-      where.status = status;
+    if (req.body.hasOwnProperty("status")) {
+      status = req.body.status;
+      where.status = parseInt(status);
     }
     if (
-        !_.isEmpty(req.query.dateTo) &&
-        req.query.dateTo &&
-        !_.isEmpty(req.query.dateFrom) &&
-        req.query.dateFrom
+        !_.isEmpty(req.body.dateTo) &&
+        req.body.dateTo &&
+        !_.isEmpty(req.body.dateFrom) &&
+        req.body.dateFrom
     ) {
-      dateTo = req.query.dateTo;
-      dateFrom = req.query.dateFrom;
+      dateTo = req.body.dateTo;
+      dateFrom = req.body.dateFrom;
       where.createdAt = {
         $gte: new Date(dateFrom),
         $lte: new Date(dateTo),
@@ -609,6 +614,170 @@ exports.listUsers = asyncHandler(async (req, res, next) => {
       data: [],
       msg: `User list failed with error: ${error.message}, errorcode:${error.errorCode}`,
       errorCode: "USR22",
+      statusCode: 500
+    });
+  }
+});
+
+/**
+ * @desc admin getInstitutionAdmin
+ * @route POST /api/v2/admin/institution/single
+ * @access PUBLIC
+ */
+exports.getInstitutionAdmin = asyncHandler(async (req, res, next) => {
+  let subject = "Institution Admin";
+  try{
+    let createdBy = req.user.id;
+    const ObjectId = require("mongoose").Types.ObjectId;
+    let {id} = req.body;
+    let where = {_id: new ObjectId(id)};
+    if(!await utils.isValidObjectId(id))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
+    where.isInstitutionAdmin = 1;
+    const obj = await helper.UserHelper.getUser(where);
+    if(!_.isEmpty(obj)) {
+      await logger.filecheck(
+          `INFO: ${subject} fetched successfully by: ${createdBy} with data ${JSON.stringify(
+              obj
+          )} \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: obj,
+        msg: `${subject} successfully fetched`,
+        statusCode: 200
+      });
+    }else{
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  `No record!`,
+        errorCode: "USR23",
+        statusCode: 404
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg:  `${subject} fetch failed with error ${error.message}`,
+      errorCode: "USR24",
+      statusCode: 500
+    });
+  }
+});
+
+/**
+ * @desc admin getSystemAdmin
+ * @route POST /api/v2/admin/system/single
+ * @access PUBLIC
+ */
+exports.getSystemAdmin = asyncHandler(async (req, res, next) => {
+  let subject = "System Admin";
+  try{
+
+    let createdBy = req.user.id;
+    const ObjectId = require("mongoose").Types.ObjectId;
+    let {id} = req.body;
+    if(!await utils.isValidObjectId(id))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
+    let where = {_id: new ObjectId(id)};
+    where.isSystemAdmin = 1;
+    const obj = await helper.UserHelper.getUser(where);
+    if(!_.isEmpty(obj)) {
+      await logger.filecheck(
+          `INFO: ${subject} fetched successfully by: ${createdBy} with data ${JSON.stringify(
+              obj
+          )} \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: obj,
+        msg: `${subject} successfully fetched`,
+        statusCode: 200
+      });
+    }else{
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  `No record!`,
+        errorCode: "USR23",
+        statusCode: 404
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg:  `${subject} fetch failed with error ${error.message}`,
+      errorCode: "USR24",
+      statusCode: 500
+    });
+  }
+});
+
+/**
+ * @desc user getOne
+ * @route POST /api/v2/user/single
+ * @access PUBLIC
+ */
+exports.getUser = asyncHandler(async (req, res, next) => {
+  let subject = "User";
+  try{
+    let createdBy = req.user.id;
+    const ObjectId = require("mongoose").Types.ObjectId;
+    let {id} = req.body;
+    if(!await utils.isValidObjectId(id))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
+    let where = {_id: new ObjectId(id)};
+    where.isInstitutionAdmin = 0;
+    where.isSystemAdmin = 0;
+    const obj = await helper.UserHelper.getUser(where);
+    if(!_.isEmpty(obj)) {
+      await logger.filecheck(
+          `INFO: ${subject} fetched successfully by: ${createdBy} with data ${JSON.stringify(
+              obj
+          )} \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: obj,
+        msg: `${subject} successfully fetched`,
+        statusCode: 200
+      });
+    }else{
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  `No record!`,
+        errorCode: "USR23",
+        statusCode: 404
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg:  `${subject} fetch failed with error ${error.message}`,
+      errorCode: "USR24",
       statusCode: 500
     });
   }

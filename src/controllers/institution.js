@@ -61,7 +61,14 @@ exports.add = asyncHandler(async (req, res, next) => {
       });
     if(req.user) createdBy = req.user.id || null;
     let {name, phone, email, address, businessId, logo, modules, admin_url} = req.body;
-    const ObjectId = require("mongoose").Types.ObjectId;
+    if(!await utils.isValidObjectId(businessId))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "Business provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
     let subjectContainer = {
       name,
       phone,
@@ -250,6 +257,14 @@ exports.update = asyncHandler(async (req, res) => {
     const {name, phone, address, email, logo, modules, institutionConfig, id} = req.body;
     const data = {name, phone, address, email, logo: fileName, modules, institutionConfig};
     const ObjectId = require("mongoose").Types.ObjectId;
+    if(!await utils.isValidObjectId(id))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
     const update = await subjectHelperUpdate({
       filter: {
         _id: new ObjectId(id),
@@ -294,7 +309,9 @@ exports.remove = asyncHandler(async (req, res, next) => {
     let { ids } = req.body;
     let model = subjectPascal;
     const ObjectId = require("mongoose").Types.ObjectId;
-    ids.map((d) => new ObjectId(d));
+    ids.map(async (d) => {
+      if (await utils.isValidObjectId(d)) new ObjectId(d)
+    });
     let del = await helper.backupAndDelete({
       ids,
       deletedBy,
@@ -333,6 +350,59 @@ exports.remove = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc Institution
+ * @route POST /api/v2/institution/single
+ * @access PUBLIC
+ */
+exports.getInstitution = asyncHandler(async (req, res, next) => {
+  let subject = "Institution";
+  try{
+    let createdBy = req.user.id;
+    const ObjectId = require("mongoose").Types.ObjectId;
+    let {id} = req.body;
+    if(!await utils.isValidObjectId(id))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
+    let where = {_id: new ObjectId(id)};
+    const obj = await helper.InstitutionHelper.getInstitution(where);
+    if(!_.isEmpty(obj)) {
+      await logger.filecheck(
+          `INFO: ${subject} fetched successfully by: ${createdBy} with data ${JSON.stringify(
+              obj
+          )} \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: obj,
+        msg: `${subject} successfully fetched`,
+        statusCode: 200
+      });
+    }else{
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  `No record!`,
+        errorCode: "APP34",
+        statusCode: 404
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg:  `${subject} fetch failed with error ${error.message}`,
+      errorCode: "APP35",
+      statusCode: 500
+    });
+  }
+});
+
+/**
  * @desc InstitutionDocumentType
  * @route POST /api/v2/institution/addDocType
  * @access Institution admin
@@ -361,7 +431,14 @@ exports.addDocType = asyncHandler(async (req, res, next) => {
         statusCode: 406,
       });
     let { name, abbr, type, institutionId } = req.body;
-    const ObjectId = require("mongoose").Types.ObjectId;
+    if(!await utils.isValidObjectId(institutionId))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "Institution ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
     subjectContainer = {
       name:name.toUpperCase(),
       abbr:abbr.toLowerCase(),
@@ -419,7 +496,7 @@ exports.listDocType = asyncHandler(async (req, res, next) => {
     const ObjectId = require("mongoose").Types.ObjectId;
     let where = {};
     // use this for fields that has boolean values or 1 and 0
-    if (!_.isEmpty(req.body.institutionId) && req.body.institutionId) {
+    if (!_.isEmpty(req.body.institutionId) && req.body.institutionId && await utils.isValidObjectId(req.body.institutionId)) {
       where.institutionId = new ObjectId(req.body.institutionId);
     }
     if (!_.isEmpty(req.body.type) && req.body.type) {
@@ -503,6 +580,14 @@ exports.updateDocType = asyncHandler(async (req, res) => {
         statusCode: 406,
       });
     const { name, abbr, type, id } = req.body;
+    if(!await utils.isValidObjectId(id))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
     const data = { name:name.toUpperCase(), abbr:abbr.toLowerCase(), type, createdBy };
     const ObjectId = require("mongoose").Types.ObjectId;
     const update = await helper.InstitutionHelper.updateInstitutionDocumentType({
@@ -549,7 +634,9 @@ exports.removeDocType = asyncHandler(async (req, res, next) => {
     let { ids } = req.body;
     let model = "InstitutionDocumentType";
     const ObjectId = require("mongoose").Types.ObjectId;
-    ids.map((d) => new ObjectId(d));
+    ids.map(async (d) => {
+      if (await utils.isValidObjectId(d)) new ObjectId(d)
+    });
     let del = await helper.backupAndDelete({
       ids,
       deletedBy,
@@ -583,6 +670,59 @@ exports.removeDocType = asyncHandler(async (req, res, next) => {
       msg: `${subjectPascal} document type delete failed with error ${error.message}`,
       errorCode: "SUB10",
       statusCode: 500,
+    });
+  }
+});
+
+/**
+ * @desc InstitutionDocumentType
+ * @route POST /api/v2/institution/docType/single
+ * @access PUBLIC
+ */
+exports.getDocType = asyncHandler(async (req, res, next) => {
+  let subject = "Institution Document Type";
+  try{
+    let createdBy = req.user.id;
+    const ObjectId = require("mongoose").Types.ObjectId;
+    let {id} = req.body;
+    if(!await utils.isValidObjectId(id))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
+    let where = {_id: new ObjectId(id)};
+    const obj = await helper.InstitutionHelper.getInstitutionDocumentType(where);
+    if(!_.isEmpty(obj)) {
+      await logger.filecheck(
+          `INFO: ${subject} fetched successfully by: ${createdBy} with data ${JSON.stringify(
+              obj
+          )} \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: obj,
+        msg: `${subject} successfully fetched`,
+        statusCode: 200
+      });
+    }else{
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  `No record!`,
+        errorCode: "APP34",
+        statusCode: 404
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg:  `${subject} fetch failed with error ${error.message}`,
+      errorCode: "APP35",
+      statusCode: 500
     });
   }
 });

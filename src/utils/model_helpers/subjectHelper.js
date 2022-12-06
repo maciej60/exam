@@ -196,7 +196,7 @@ module.exports = {
   },
 
   getSubjectTopic: async (where) => {
-    return Subject.find(where)
+    return SubjectTopic.find(where)
         .populate({ path: "institutionId" })
         .populate({ path: "subjectId" });
   },

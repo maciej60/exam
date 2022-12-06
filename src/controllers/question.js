@@ -57,7 +57,46 @@ exports.add = asyncHandler(async (req, res, next) => {
             options,
             answer,
         } = req.body;
-        const ObjectId = require("mongoose").Types.ObjectId;
+        if(!await utils.isValidObjectId(institutionId))
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg:  "Institution ID provided is invalid",
+                errorCode: "MEN17",
+                statusCode: 406
+            });
+        if(!await utils.isValidObjectId(subjectId))
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg:  "Subject ID provided is invalid",
+                errorCode: "MEN17",
+                statusCode: 406
+            });
+        if(!await utils.isValidObjectId(topicId))
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg:  "Topic ID provided is invalid",
+                errorCode: "MEN17",
+                statusCode: 406
+            });
+        if(!await utils.isValidObjectId(subTopicId))
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg:  "SubTopic ID provided is invalid",
+                errorCode: "MEN17",
+                statusCode: 406
+            });
+        if(!await utils.isValidObjectId(questionTypeId))
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg:  "Question-type ID provided is invalid",
+                errorCode: "MEN17",
+                statusCode: 406
+            });
         let questionContainer = {
             institutionId,
             subjectId,
@@ -123,19 +162,19 @@ exports.list = asyncHandler(async (req, res, next) => {
                 $options: "i",
             };
         }
-        if (!_.isEmpty(req.body.institutionId) && req.body.institutionId) {
+        if (!_.isEmpty(req.body.institutionId) && req.body.institutionId && await utils.isValidObjectId(req.body.institutionId)) {
             where.institutionId = new ObjectId(req.body.institutionId);
         }
-        if (!_.isEmpty(req.body.subjectId) && req.body.subjectId) {
+        if (!_.isEmpty(req.body.subjectId) && req.body.subjectId && await utils.isValidObjectId(req.body.subjectId)) {
             where.subjectId = new ObjectId(req.body.subjectId);
         }
-        if (!_.isEmpty(req.body.topicId) && req.body.topicId) {
+        if (!_.isEmpty(req.body.topicId) && req.body.topicId && await utils.isValidObjectId(req.body.topicId)) {
             where.topicId = new ObjectId(req.body.topicId);
         }
-        if (!_.isEmpty(req.body.subTopicId) && req.body.subTopicId) {
+        if (!_.isEmpty(req.body.subTopicId) && req.body.subTopicId && await utils.isValidObjectId(req.body.subTopicId)) {
             where.subTopicId = new ObjectId(req.body.subTopicId);
         }
-        if (!_.isEmpty(req.body.questionTypeId) && req.body.questionTypeId) {
+        if (!_.isEmpty(req.body.questionTypeId) && req.body.questionTypeId && await utils.isValidObjectId(req.body.questionTypeId)) {
             where.questionTypeId = new ObjectId(req.body.questionTypeId);
         }
         const objWithoutMeta = await helper.QuestionHelper.getQuestions({
@@ -230,6 +269,14 @@ exports.update = asyncHandler(async (req, res) => {
             answer,
         };
         const ObjectId = require("mongoose").Types.ObjectId;
+        if(!await utils.isValidObjectId(id))
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg:  "ID provided is invalid",
+                errorCode: "MEN17",
+                statusCode: 406
+            });
         const update = await helper.QuestionHelper.findUpdate({
             filter: {
                 _id: new ObjectId(id),
@@ -274,7 +321,9 @@ exports.remove = asyncHandler(async (req, res, next) => {
         let { ids } = req.body;
         let model = "QuestionBank";
         const ObjectId = require("mongoose").Types.ObjectId;
-        ids.map((d) => new ObjectId(d));
+        ids.map(async (d) => {
+            if (await utils.isValidObjectId(d)) new ObjectId(d)
+        });
         let del = await helper.backupAndDelete({
             ids,
             deletedBy,
@@ -308,6 +357,59 @@ exports.remove = asyncHandler(async (req, res, next) => {
             msg: `Question delete failed with error ${error.message}`,
             errorCode: "QUE10",
             statusCode: 500,
+        });
+    }
+});
+
+/**
+ * @desc Question
+ * @route POST /api/v2/question/single
+ * @access PUBLIC
+ */
+exports.getQuestion = asyncHandler(async (req, res, next) => {
+    let subject = "Question";
+    try{
+        let createdBy = req.user.id;
+        const ObjectId = require("mongoose").Types.ObjectId;
+        let {id} = req.body;
+        if(!await utils.isValidObjectId(id))
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg:  "ID provided is invalid",
+                errorCode: "MEN17",
+                statusCode: 406
+            });
+        let where = {_id: new ObjectId(id)};
+        const obj = await helper.QuestionHelper.getQuestion(where);
+        if(!_.isEmpty(obj)) {
+            await logger.filecheck(
+                `INFO: ${subject} fetched successfully by: ${createdBy} with data ${JSON.stringify(
+                    obj
+                )} \n`
+            );
+            return utils.send_json_response({
+                res,
+                data: obj,
+                msg: `${subject} successfully fetched`,
+                statusCode: 200
+            });
+        }else{
+            return utils.send_json_error_response({
+                res,
+                data: [],
+                msg:  `No record!`,
+                errorCode: "APP34",
+                statusCode: 404
+            });
+        }
+    } catch (error) {
+        return utils.send_json_error_response({
+            res,
+            data: [],
+            msg:  `${subject} fetch failed with error ${error.message}`,
+            errorCode: "APP35",
+            statusCode: 500
         });
     }
 });

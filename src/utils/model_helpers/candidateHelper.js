@@ -38,6 +38,7 @@ module.exports = {
   },
 
   createCandidate: async (data) => {
+    if(_.isArray(data) && data.length > 1) return Candidate.insertMany(data);
     return Candidate.create(data);
   },
 

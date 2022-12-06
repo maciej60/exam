@@ -124,6 +124,10 @@ module.exports = {
     return { result, message: "successful" };
   },
 
+  getApplicationStage: async (where) => {
+    return ApplicationStage.find(where).populate({path: 'institutionId'}).populate({path: 'applicationId'});
+  },
+
   getApplicationStages: async (params) => {
     const { where, queryOptions } = params;
     const options = {
@@ -294,6 +298,13 @@ module.exports = {
         return results;
       }
     });
+  },
+
+  getApplicationUserPermission: async (where) => {
+    return ApplicationUserPermission.find(where)
+        .populate({path: 'institutionId'})
+        .populate({path: 'applicationId'})
+        .populate({path: 'applicationStageId'});
   },
 
   createApplicationDocumentType: async (data) => {

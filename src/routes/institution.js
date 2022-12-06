@@ -7,7 +7,9 @@ const {
     addDocType,
     updateDocType,
     listDocType,
-    removeDocType
+    removeDocType,
+    getInstitution,
+    getDocType
 } = require("../controllers/institution");
 
 const { protect } = require("../middleware/auth");
@@ -21,5 +23,8 @@ router.post("/addDocType", protect, addDocType);
 router.post("/updateDocType", protect, updateDocType);
 router.post("/listDocType", protect, listDocType);
 router.post("/removeDocType", protect, removeDocType);
+
+router.post("/single", protect, getInstitution);
+router.post("/docType/single", protect, getDocType);
 
 module.exports = router;

@@ -3,19 +3,23 @@ const {
     add,
     update,
     list,
+    getApplication,
     remove,
     addStage,
     updateStage,
     listStage,
+    getStage,
     removeStage,
     addPermission,
     updatePermission,
     listPermission,
     removePermission,
+    getPermission,
     addDocType,
     updateDocType,
     listDocType,
-    removeDocType
+    removeDocType,
+    getDocType
 } = require("../controllers/application");
 
 const { protect } = require("../middleware/auth");
@@ -36,5 +40,10 @@ router.post("/addDocType", protect, addDocType);
 router.post("/updateDocType", protect, updateDocType);
 router.post("/listDocType", protect, listDocType);
 router.post("/removeDocType", protect, removeDocType);
+
+router.post("/single", protect, getApplication);
+router.post("/stage/single", protect, getStage);
+router.post("/permission/single", protect, getPermission);
+router.post("/docType/single", protect, getDocType);
 
 module.exports = router;
