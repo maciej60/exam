@@ -52,9 +52,6 @@ exports.login = asyncHandler(async (req, res, next) => {
     });
   }
   const get_user = await helper.UserHelper.getUser(check_user._id);
-  /*const obj = await helper.MenuHelper.getUserMenu({userId: check_user._id});
-  const main = await helper.MenuHelper.getMenu({});
-  const build = utils.buildMenu(main, obj)*/
   if (check_user.firstLogin === 1) {
     utils.sendNoTokenResponse(
         get_user,

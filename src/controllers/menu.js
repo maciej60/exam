@@ -38,6 +38,14 @@ exports.addMenu = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
+    if(!await utils.isValidObjectId(menuHeaderId))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "Menu-header ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
     if (!moduleId) {
       return utils.send_json_error_response({
         res,
@@ -47,6 +55,14 @@ exports.addMenu = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
+    if(!await utils.isValidObjectId(moduleId))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "Module ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
     let SystemMenuData = { menuObject, moduleId, menuHeaderId, forSystemAdmin, forInstitutionAdmin}
     let add_menu = await helper.MenuHelper.createMenu(SystemMenuData);
     await logger.filecheck(
@@ -89,6 +105,14 @@ exports.addInstitutionMenu = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
+    if(!await utils.isValidObjectId(institutionId))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "Institution ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
     if (!menuData) {
       return utils.send_json_error_response({
         res,
@@ -158,6 +182,22 @@ exports.addUserMenu = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
+    if(!await utils.isValidObjectId(userId))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "User ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
+    if(!await utils.isValidObjectId(institutionId))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "Institution ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
     let data = {institutionId, userId, menuData, createdBy}
     let add_menu = await helper.MenuHelper.createUserMenu(data);
     await logger.filecheck(
@@ -192,10 +232,10 @@ exports.getMenu = asyncHandler(async (req, res, next) => {
     let createdBy = req.user.id;
     const ObjectId = require("mongoose").Types.ObjectId;
     let where = {};
-    if (!_.isEmpty(req.body.moduleId) && req.body.moduleId) {
+    if (!_.isEmpty(req.body.moduleId) && req.body.moduleId && await utils.isValidObjectId(req.body.moduleId)) {
       where.moduleId = new ObjectId(req.body.moduleId);
     }
-    if (!_.isEmpty(req.body.menuHeaderId) && req.body.menuHeaderId) {
+    if (!_.isEmpty(req.body.menuHeaderId) && req.body.menuHeaderId && await utils.isValidObjectId(req.body.menuHeaderId)) {
       where.menuHeaderId = new ObjectId(req.body.menuHeaderId);
     }
     if (req.body.hasOwnProperty("forSystemAdmin")) {
@@ -205,7 +245,7 @@ exports.getMenu = asyncHandler(async (req, res, next) => {
       where.forInstitutionAdmin = parseInt(req.body.forInstitutionAdmin);
     }
     const obj = await helper.MenuHelper.getMenu(where);
-    if(obj) {
+    if(!_.isEmpty(obj)) {
       await logger.filecheck(
           `INFO: System menu fetched successfully by: ${createdBy} with data ${JSON.stringify(
               obj
@@ -255,6 +295,14 @@ exports.getInstitutionMenu = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
+    if(!await utils.isValidObjectId(institutionId))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
     const obj = await helper.MenuHelper.getInstitutionMenu({institutionId});
     const main = await helper.MenuHelper.getMenu({});
     const build = utils.buildMenu(main, obj)
@@ -308,6 +356,14 @@ exports.getUserMenu = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
+    if(!await utils.isValidObjectId(userId))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
     const obj = await helper.MenuHelper.getUserMenu({userId});
     if(!obj)
       return utils.send_json_error_response({
