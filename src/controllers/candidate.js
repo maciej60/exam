@@ -196,6 +196,181 @@ exports.add = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc Candidate
+ * @route POST /api/v2/candidate/addBulk
+ * @access PUBLIC
+ */
+exports.addBulk = asyncHandler(async (req, res, next) => {
+  let email_log_data;
+  let bad = [];
+  let good = [];
+  try {
+    let createdBy = req.user.id || null;
+    let {
+      data,
+      institutionId
+    } = req.body;
+    const validationSchema = Joi.object({
+      institutionId: Joi.string(),
+      data: Joi.array().items(Joi.object({
+        firstName: Joi.string().min(1).max(50).required(),
+        lastName: Joi.string().min(1).max(50).required(),
+        middleName: Joi.string().allow(null, ''),
+        email: Joi.string().min(5).max(50).email().required(),
+        phone: Joi.string().min(9).max(15).required(),
+        institutionId: Joi.string(),
+        title: Joi.string().min(2).max(10).required(),
+        candidateTypeId: Joi.string().required(),
+        gender: Joi.string().max(20).min(4),
+      }))
+    })
+    const { error } = validationSchema.validate(req.body);
+    if (error)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Candidate bulk create failed with validation error ${error.details[0].message}`,
+        errorCode: "E502",
+        statusCode: 406,
+      });
+    const ObjectId = require("mongoose").Types.ObjectId;
+    if(!await utils.isValidObjectId(institutionId))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "Institution ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
+    let institution = await helper.InstitutionHelper.getInstitution({ _id: new ObjectId(institutionId) });
+    if (_.isEmpty(institution))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Institution does not exist`,
+        errorCode: "E404",
+        statusCode: 500,
+      });
+    institution = institution[0];
+    let iid = institution._id;
+    for(let u of data){
+      const check_candidate_already_created =
+          await helper.CandidateHelper.getCandidate({
+            $or: [{ email: u.email }, { phone: u.phone }],
+          });
+      if (check_candidate_already_created){
+        u.reason = "User already exist!"
+        bad.push(u)
+      }else{
+        let pw = generator.generate({
+          length: 10,
+          numbers: true,
+          uppercase: true,
+          lowercase: true,
+          symbols: false,
+        });
+        let pw_hashed = await utils.hashPassword(pw);
+        let {
+          title,
+          firstName,
+          lastName,
+          middleName,
+          email,
+          phone,
+          candidateTypeId,
+          gender,
+        } = u;
+        let candidate_data = {
+          title,
+          firstName,
+          lastName,
+          middleName,
+          candidateCode: await helper.CandidateHelper.generateCode(),
+          email,
+          phone,
+          candidateTypeId,
+          institutionId: iid,
+          gender,
+          firstLogin: 1,
+          status: 1,
+          password: pw_hashed,
+          createdBy
+        };
+        try{
+          const create_candidate = await helper.CandidateHelper.createCandidate(
+              candidate_data
+          );
+          if (create_candidate) {
+            await logger.filecheck(
+                `INFO: Institution Candidate created for institution ${institutionId}: by ${createdBy} at ${time} with data ${JSON.stringify(
+                    create_candidate
+                )} \n`
+            );
+            good.push(create_candidate)
+            /**
+             * begin email sending
+             */
+            let success = 0;
+            let p;
+            let emailPhone = email + " or " + phone;
+            let emailParams = {
+              heading: "Your Candidate account created successfully",
+              previewText: "Exam portal is good!",
+              emailPhone,
+              email,
+              password: pw,
+              message: "This exam portal is good.",
+              institutionCode: institution.institutionCode,
+              institutionName: institution.name,
+            };
+            p = {
+              to: email,
+              message: emailTemplate.newUser(emailParams),
+              subject: "Candidate Created ",
+            };
+            const send_email = await utils.send_email_api(p);
+            if (send_email.response.Code === "02") {
+              success = 1;
+            }
+            console.log(`*** email sent ***`);
+            email_log_data = {
+              email: email,
+              requestData: send_email.request,
+              responseData: send_email.response,
+              emailLogStatus: success,
+            };
+            const create_email_log = await helper.EmailLogHelper.createEmailLog(
+                email_log_data
+            );
+            console.log(`*** email-log added ***`);
+          }else{
+            u.reason = "Candidate create failed!"
+            bad.push(u)
+          }
+        }catch (e) {
+          u.reason = e.message
+          bad.push(u)
+        }
+      }
+    }
+    return utils.send_json_response({
+      res,
+      data: {success: good, error: bad},
+      msg: "Candidate successfully created",
+      statusCode: 201
+    });
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Institution Candidate bulk create failed with error ${error.message}`,
+      errorCode: error.errorCode,
+      statusCode: 500,
+    });
+  }
+});
+
+/**
  * @desc list Candidates
  * @route GET /api/v2/candidate/list
  * @access Institution User

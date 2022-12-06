@@ -48,7 +48,7 @@ function currDayMonthYear() {
 }
 
 function shuffleArray(arr) {
-  var currentIndex = arr.length,
+  let currentIndex = arr.length,
     randomIndex;
   while (0 !== currentIndex) {
     randomIndex = Math.floor(Math.random() * currentIndex);
@@ -102,8 +102,8 @@ Date.prototype.toMysqlFormat = function () {
 };
 
 Date.prototype.getDateElems = function () {
-  var mm = this.getMonth() + 1;
-  var dd = this.getDate();
+  let mm = this.getMonth() + 1;
+  let dd = this.getDate();
   mm = (mm > 9 ? "" : "0") + mm;
   dd = (dd > 9 ? "" : "0") + dd;
   yyyy = this.getFullYear();
@@ -111,15 +111,15 @@ Date.prototype.getDateElems = function () {
 };
 
 Date.prototype.getDateElemsUnpadded = function () {
-  var mm = this.getMonth() + 1;
-  var dd = this.getDate();
+  let mm = this.getMonth() + 1;
+  let dd = this.getDate();
   yyyy = this.getFullYear();
   return { day: dd, month: mm, year: yyyy };
 };
 
 Date.prototype.getDateElemsText = function () {
   const monthName = new Date().toLocaleString("default", { month: "long" });
-  var dd = this.getDate();
+  let dd = this.getDate();
   dd = (dd > 9 ? "" : "0") + dd;
   yyyy = this.getFullYear();
   return { day: dd, month: monthName, year: yyyy };
@@ -497,15 +497,15 @@ module.exports = {
   },
 
   getDateFromMonthYear: async (y, m) => {
-    var date = new Date(`${y}-${m}-10`);
-    var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    let date = new Date(`${y}-${m}-10`);
+    let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
     return moment(lastDay).clone().endOf("month").format("YYYY-MM-DD hh:mm");
   },
 
   getFirstLastDateOfMonth: async (d) => {
-    var date = new Date(d);
-    var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-    var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    let date = new Date(d);
+    let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+    let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
     const startOfMonth = moment(firstDay)
       .clone()
       .startOf("month")
@@ -534,7 +534,7 @@ module.exports = {
   },
 
   passwordPolicyPassed: async (d) => {
-    var strongRegex = new RegExp(
+    let strongRegex = new RegExp(
       "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})"
     );
     return strongRegex.test(d);
@@ -565,10 +565,10 @@ module.exports = {
 
   idToken: (length) => {
     //edit the token allowed characters
-    var a = "1234567890".split("");
-    var b = [];
-    for (var i = 0; i < length; i++) {
-      var j = (Math.random() * (a.length - 1)).toFixed(0);
+    let a = "1234567890".split("");
+    let b = [];
+    for (let i = 0; i < length; i++) {
+      let j = (Math.random() * (a.length - 1)).toFixed(0);
       b[i] = a[j];
     }
     return b.join("");
@@ -578,11 +578,11 @@ module.exports = {
     try {
       console.log("Publishing ...");
       let msg = {};
-      var conn = await amqplib.connect(amqp_url, "heartbeat=60");
-      var ch = await conn.createChannel();
-      var exch = params.exchange;
-      var q = params.queue;
-      var rkey = params.rkey;
+      let conn = await amqplib.connect(amqp_url, "heartbeat=60");
+      let ch = await conn.createChannel();
+      let exch = params.exchange;
+      let q = params.queue;
+      let rkey = params.rkey;
       if (params.msg) msg = params.msg;
       await ch
         .assertExchange(exch, "direct", { durable: true })
@@ -611,9 +611,9 @@ module.exports = {
   jobExec: async (params) => {
     try {
       let msg = {};
-      var conn = await amqplib.connect(amqp_url, "heartbeat=60");
-      var ch = await conn.createChannel();
-      var q = params.queue;
+      let conn = await amqplib.connect(amqp_url, "heartbeat=60");
+      let ch = await conn.createChannel();
+      let q = params.queue;
       await ch.assertQueue(q, { durable: true });
       await ch.consume(
         q,
@@ -750,10 +750,10 @@ module.exports = {
   },
 
   genData: (length) => {
-    var a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-    var b = [];
-    for (var i = 0; i < length; i++) {
-      var j = (Math.random() * (a.length - 1)).toFixed(0);
+    let a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    let b = [];
+    for (let i = 0; i < length; i++) {
+      let j = (Math.random() * (a.length - 1)).toFixed(0);
       b[i] = a[j];
     }
     return b.join("");

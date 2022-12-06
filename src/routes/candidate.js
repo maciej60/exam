@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const {
   add,
+  addBulk,
   list,
   update,
   remove,
@@ -15,6 +16,7 @@ const { uploadCandidateCsv, uploadCandidatePhoto, uploadCandidateDocuments } = r
 const { protect } = require("../middleware/auth");
 
 router.post("/add", protect, add);
+router.post("/addBulk", protect, addBulk);
 router.post("/list", protect, list);
 router.post("/update", protect, uploadCandidatePhoto.single("photoUrl"), update);
 router.post("/delete", protect, remove);
