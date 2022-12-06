@@ -30,5 +30,6 @@ module.exports = {
   SmsLogHelper: require("./smsLogHelper"),
   EmailLogHelper: require("./emailLogHelper"),
   DropDownHelper: require("./dropdownHelper"),
+  TokenHelper: require("./tokenHelper"),
 };
 

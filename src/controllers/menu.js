@@ -306,7 +306,7 @@ exports.getInstitutionMenu = asyncHandler(async (req, res, next) => {
     const obj = await helper.MenuHelper.getInstitutionMenu({institutionId});
     const main = await helper.MenuHelper.getMenu({});
     const build = utils.buildMenu(main, obj)
-    if(obj){
+    if(!_.isEmpty(obj)) {
       await logger.filecheck(
           `INFO: Institution menu of ${institutionId} fetched successfully by: ${createdBy} with data ${JSON.stringify(
               obj

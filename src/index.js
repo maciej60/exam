@@ -27,6 +27,7 @@ const subject = require("./routes/subject");
 const question = require("./routes/question");
 const dropdown = require("./routes/dropdown");
 const candidate = require("./routes/candidate");
+const token = require("./routes/token");
 const communication = require("./routes/communication");
 const test = require("./routes/test");
 const { protect } = require("./middleware/auth");
@@ -65,6 +66,7 @@ app.use("/api/v2/subject", subject);
 app.use("/api/v2/question", question);
 app.use("/api/v2/dropdown", dropdown);
 app.use("/api/v2/candidate", candidate);
+app.use("/api/v2/token", token);
 app.use("/api/v2/communication", communication);
 app.use("/api/v2/test", test);
 
