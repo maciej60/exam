@@ -160,7 +160,8 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
      */
     let sender;
     let user_id = check_user._id;
-    let url = reset_url + "?e0779Binary=" + user_id;
+    let token = await helper.TokenHelper.createToken({data: {userId: user_id}});
+    let url = reset_url + "?e0779Binary=" + token.token;
     let success = 0;
     /**
      * begin send sms
@@ -312,7 +313,17 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
       });
     }
     const ObjectId = require("mongoose").Types.ObjectId;
-    if (!ObjectId.isValid(resetPasswordCode)) {
+    let process_token = await helper.TokenHelper.processToken({where: {token: resetPasswordCode}, dataColumn: "userId"})
+    if(_.isEmpty(process_token.result) || process_token.message !== 'success')
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: process_token.message,
+        errorCode: "AUTH10",
+        statusCode: 406
+      });
+    let userId = process_token.result.data.userId
+    if (!ObjectId.isValid(userId)) {
       return utils.send_json_error_response({
         res,
         data: [],
@@ -321,7 +332,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
         statusCode: 404
       });
     }
-    let user_id = new ObjectId(resetPasswordCode);
+    let user_id = new ObjectId(userId);
     const check_user = await helper.UserHelper.getUser({
       _id: user_id,
     });
@@ -385,7 +396,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
     const create_email_log = await helper.EmailLogHelper.createEmailLog(
       email_log_data
     );
-    console.log(`*** emaillog added ***`);
+    console.log(`*** email-log added ***`);
     return utils.send_json_response({
       res,
       data: send_email.response,

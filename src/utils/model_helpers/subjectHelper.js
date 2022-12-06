@@ -100,7 +100,7 @@ module.exports = {
   },
 
   getSubject: async (where) => {
-    return Subject.find(where).populate({ path: "institutionId" });
+    return Subject.findOne(where).populate({ path: "institutionId" });
   },
 
   findUpdate: async ({ filter: filter, update: update, options: options }) => {
@@ -196,7 +196,7 @@ module.exports = {
   },
 
   getSubjectTopic: async (where) => {
-    return SubjectTopic.find(where)
+    return SubjectTopic.findOne(where)
         .populate({ path: "institutionId" })
         .populate({ path: "subjectId" });
   },
@@ -311,7 +311,7 @@ module.exports = {
   },
 
   getSubTopic: async (where) => {
-    return SubTopic.find(where)
+    return SubTopic.findOne(where)
         .populate({ path: "institutionId" })
         .populate({ path: "subjectId" })
         .populate({ path: "topicId" });

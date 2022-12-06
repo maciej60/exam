@@ -114,7 +114,7 @@ module.exports = {
     },
 
     getQuestion: async (where) => {
-        return QuestionBank.find(where);
+        return QuestionBank.findOne(where);
     },
 
     findUpdate: async ({ filter: filter, update: update, options: options }) => {

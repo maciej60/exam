@@ -402,7 +402,7 @@ module.exports = {
   },
 
   getApplicationDocumentType: async (where) => {
-    return ApplicationDocumentType.find(where)
+    return ApplicationDocumentType.findOne(where)
         .populate({path: 'institutionId'})
         .populate({path: 'applicationId'})
         .populate({path: 'institutionDocumentTypes'})

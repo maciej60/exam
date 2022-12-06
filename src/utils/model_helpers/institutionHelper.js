@@ -79,7 +79,7 @@ module.exports = {
   },
 
   getInstitution: async (where) => {
-    return Institution.find(where).populate({path: 'businessId'});
+    return Institution.findOne(where).populate({path: 'businessId'});
   },
 
   findUpdate: async ({
@@ -166,7 +166,7 @@ module.exports = {
   },
 
   getInstitutionDocumentType: async (where) => {
-    return InstitutionDocumentType.find(where)
+    return InstitutionDocumentType.findOne(where)
         .populate({path: 'institutionId'})
         .populate({path: 'createdBy'});
   },
