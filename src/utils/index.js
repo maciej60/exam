@@ -424,7 +424,7 @@ module.exports = {
     sort = buildQueryOptionSort(sort);
     page = page ? parseInt(page) : 1;
     per_page = per_page ? parseInt(per_page) : 10;
-    if (per_page > 100) return "records per page exceeded, 100 maximum!";
+    if (per_page > 100) per_page = 100;
     const customLabels = {
       totalDocs: "total",
       docs: "data",
