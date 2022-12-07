@@ -29,10 +29,10 @@ let subjectHelperUpdate = helper.InstitutionHelper.findUpdate;
  * @desc Institution
  * @route POST /api/v2/institution/add
  * @access PUBLIC
- * @param ?e00987TE4=code this contains the institutionCode for creating admin
+ * @param ?e00987TE4=code this is the token,frontend pass it as token to /add
  */
-exports.add = asyncHandler(async (req, res, next) => {
-  let sender, createdBy;
+exports.setup = asyncHandler(async (req, res, next) => {
+  let sender;
   let validationSchema;
   try {
     /**
@@ -40,59 +40,32 @@ exports.add = asyncHandler(async (req, res, next) => {
      * @type {Joi.ObjectSchema<any>}
      */
     validationSchema = Joi.object({
-      name: Joi.string().min(5).max(50).required(),
-      phone: Joi.string().min(11).max(15),
       email: Joi.string().min(5).max(50).email().required(),
-      address: Joi.string().min(10).max(100).required(),
-      businessId: Joi.string(),
-      logo: Joi.string(),
-      institutionConfig: Joi.object(),
-      modules: Joi.any(),
-      admin_url: Joi.string()
+      url: Joi.string().required(),
     });
     const {error} = validationSchema.validate(req.body);
     if (error)
       return utils.send_json_error_response({
         res,
         data: [],
-        msg: `${subjectPascal} create validation failed with error: ${error.details[0].message}`,
+        msg: `${subjectPascal} setup validation failed with error: ${error.details[0].message}`,
         errorCode: "INS01",
         statusCode: 406
       });
-    if(req.user) createdBy = req.user.id || null;
-    let {name, phone, email, address, businessId, logo, modules, admin_url} = req.body;
-    if(!await utils.isValidObjectId(businessId))
-      return utils.send_json_error_response({
-        res,
-        data: [],
-        msg:  "Business provided is invalid",
-        errorCode: "MEN17",
-        statusCode: 406
-      });
-    let subjectContainer = {
-      name,
-      phone,
-      email,
-      address,
-      institutionCode: await helper.InstitutionHelper.generateInstitutionCode(),
-      createdBy,
-      businessId,
-      logo,
-      modules
-    };
-    const create = await subjectHelperCreate(subjectContainer);
-    let instManagerCreate_URL = admin_url + "?e00987TE4=" + create.institutionCode;
+    let {email, url} = req.body;
+    let token = await helper.TokenHelper.createToken({data: {email, url}});
+    let instManagerCreate_URL = url + "?e00987TE4=" + token.token;
 
     console.log(`*** begin email sending ***`);
-    let subject = "Institution Admin Creation";
+    let subject = "Institution Email Verification";
     let emailParams = {
-      heading: `"Institution Created"`,
+      heading: `"Email verified"`,
       previewText:
           "Exam Portal is awesome!",
       message:
-          `welcome to ${process.env.APP_NAME}, your institution code is: ${create.institutionCode}. kindly click on the link below to create an institution manager. ${instManagerCreate_URL}`,
+          `welcome to ${process.env.APP_NAME}, your requested to setup an institution. kindly click on the link below to setup your institution. ${instManagerCreate_URL}`,
       url: instManagerCreate_URL,
-      url_text: "Create Admin",
+      url_text: "Setup Institution",
     };
     let template = emailTemplate.forgotPassword(emailParams);
     let p = {
@@ -111,20 +84,203 @@ exports.add = asyncHandler(async (req, res, next) => {
       responseData: sender.response,
       emailLogStatus: success,
     };
-    await helper.EmailLogHelper.createEmailLog(
-        email_log_data
-    );
+    await helper.EmailLogHelper.createEmailLog(email_log_data);
     console.log(`*** emailLog created ***`);
 
+    await logger.filecheck(
+        `INFO: ${subjectPascal}: setup link sent at ${time}  \n`
+    );
+    return utils.send_json_response({
+      res,
+      data: {instManagerCreate_URL},
+      msg: `${subjectPascal} setup link sent to your email.`,
+      statusCode: 201
+    });
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `${subjectPascal} setup failed with error ${error.message}`,
+      errorCode: "INS02",
+      statusCode: 500
+    });
+  }
+});
+
+/**
+ * @desc Institution
+ * @route POST /api/v2/institution/add
+ * @access PUBLIC
+ * @param token
+ */
+exports.add = asyncHandler(async (req, res, next) => {
+  let sender, createdBy;
+  let validationSchema;
+  try {
+    /**
+     * validate request body
+     * @type {Joi.ObjectSchema<any>}
+     */
+    validationSchema = Joi.object({
+      name: Joi.string().min(5).max(50).required(),
+      firstName: Joi.string().required(),
+      lastName: Joi.string().required(),
+      middleName: Joi.string().allow(null, ''),
+      phone: Joi.string().min(11).max(15),
+      address: Joi.string().min(10).max(100).required(),
+      businessId: Joi.string(),
+      logo: Joi.string().allow(null, ''),
+      url: Joi.string(),
+      institutionConfig: Joi.object(),
+      modules: Joi.any(),
+      token: Joi.string(),
+    });
+    const {error} = validationSchema.validate(req.body);
+    if (error)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `${subjectPascal} create validation failed with error: ${error.details[0].message}`,
+        errorCode: "INS01",
+        statusCode: 406
+      });
+    if(req.user) createdBy = req.user.id || null;
+    let {name, phone, address, businessId, logo, modules, url, token, lastName, firstName, middleName} = req.body;
+    if(!await utils.isValidObjectId(businessId))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "Business provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
+    let process_token = await helper.TokenHelper.processToken({token, dataColumn: "email"})
+    if(_.isEmpty(process_token.result) || process_token.message !== 'success')
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: process_token.message,
+        errorCode: "AUTH10",
+        statusCode: 406
+      });
+    let institutionCode = await helper.InstitutionHelper.generateInstitutionCode()
+    let email = process_token.result.data.email;
+    const check_user = await helper.UserHelper.getUser({
+      $or: [{ email }, { phone }],
+    });
+    const check_institution = await helper.InstitutionHelper.getInstitution({
+      $or: [{ email }, { phone }],
+    });
+    if (check_institution)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Email and/or phone cannot be used to create another institution`,
+        errorCode: "USR04",
+        statusCode: 201
+      });
+    if (check_user)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Email and/or phone cannot be used to create another user`,
+        errorCode: "USR04",
+        statusCode: 201
+      });
+    let subjectContainer = {
+      name,
+      phone,
+      email,
+      address,
+      institutionCode,
+      createdBy,
+      businessId,
+      logo,
+      modules
+    };
+    const create = await subjectHelperCreate(subjectContainer);
+    if(!create)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: "Institution create failed",
+        errorCode: "AUTH10",
+        statusCode: 502
+      });
     await logger.filecheck(
         `INFO: ${subjectPascal}: ${name} created at ${time} with data ${JSON.stringify(
             create
         )} \n`
     );
+    let pw = generator.generate({
+      length: 10,
+      numbers: true,
+      uppercase: true,
+      lowercase: true,
+      symbols: false,
+    });
+    let pw_hashed = await utils.hashPassword(pw);
+    let user_data = {
+      phone,
+      email,
+      lastName,
+      firstName,
+      middleName,
+      password: pw_hashed,
+      institutionId:create._id,
+      isInstitutionAdmin: 1,
+      firstLogin: 1,
+      status: 1,
+    };
+    const create_user = await helper.UserHelper.createUser(user_data);
+    if (create_user) {
+      await logger.filecheck(
+          `INFO: Institution Admin created for institution ${name}: at ${time} with data ${JSON.stringify(
+              create_user
+          )} \n`
+      );
+      console.log(`*** begin email sending ***`);
+      let p;
+      let emailPhone = email + " or " + phone;
+      let emailParams = {
+        heading: "Your Institution admin account created successfully",
+        previewText: "Exam portal is good!",
+        emailPhone,
+        email,
+        password: pw,
+        message: "Use the details provided to login to the account as the Institution Admin to configure the institution and add staffs.",
+        institutionCode,
+        institutionName: name,
+        url,
+        url_text: "Portal Login",
+      };
+      p = {
+        to: email,
+        message: emailTemplate.newUser(emailParams),
+        subject: "Institution Admin Created ",
+      };
+      let success;
+      sender = await utils.send_email_api(p);
+      if (sender.response.Code === "02") {
+        success = 1;
+      }
+      let email_log_data = {
+        email,
+        requestData: sender.request,
+        responseData: sender.response,
+        emailLogStatus: success,
+      };
+      await helper.EmailLogHelper.createEmailLog(
+          email_log_data
+      );
+      console.log(`*** emailLog created ***`);
+    }
+    // disable token
+    await helper.TokenHelper.disableToken(token)
     return utils.send_json_response({
       res,
       data: create,
-      msg: `${subjectPascal} successfully created, check your mail to create an institution manager.`,
+      msg: `${subjectPascal} successfully created, check your mail for login details.`,
       statusCode: 201
     });
   } catch (error) {

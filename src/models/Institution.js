@@ -3,22 +3,12 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 let aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const _ = require("lodash");
 
-/*const institutionConfig = new mongoose.Schema({
-    enable2wa: {
-        type: Number,
-        default: 0
-    },
-    anyCanReview: {
-        type: Number,
-        default: 0
-    },
-})*/
-
 const oSchema = new mongoose.Schema(
     {
         name: {
             type: String,
             trim: true,
+            unique: true
         },
         institutionCode: {
             type: String,

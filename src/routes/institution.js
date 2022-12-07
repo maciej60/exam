@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const {
+    setup,
     add,
     update,
     list,
@@ -15,6 +16,7 @@ const {
 const { protect } = require("../middleware/auth");
 const { uploadInstitutionLogo } = require("../middleware/fileUploader");
 
+router.post('/setup', setup);
 router.post('/add', add);
 router.post("/update", protect, uploadInstitutionLogo.single("institutionLogo"), update);
 router.post("/list", protect, list);

@@ -313,7 +313,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
       });
     }
     const ObjectId = require("mongoose").Types.ObjectId;
-    let process_token = await helper.TokenHelper.processToken({where: {token: resetPasswordCode}, dataColumn: "userId"})
+    let process_token = await helper.TokenHelper.processToken({token: resetPasswordCode, dataColumn: "userId"})
     if(_.isEmpty(process_token.result) || process_token.message !== 'success')
       return utils.send_json_error_response({
         res,
@@ -397,6 +397,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
       email_log_data
     );
     console.log(`*** email-log added ***`);
+    await helper.TokenHelper.disableToken(resetPasswordCode)
     return utils.send_json_response({
       res,
       data: send_email.response,

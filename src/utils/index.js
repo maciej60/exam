@@ -484,6 +484,11 @@ module.exports = {
     return toMysqlFormat(d);
   },
 
+  makeTokenDate: async () => {
+    let dur = process.env.TOKEN_EXPIRE_MINUTES
+    return moment(new Date()).add(parseInt(dur), 'minutes').toDate();
+  },
+
   getDateElems: async (d) => {
     return getDateElems(d);
   },

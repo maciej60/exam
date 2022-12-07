@@ -25,6 +25,16 @@ async function generateToken(append = "", prepend = "") {
   return token;
 }
 
+async function tokenIsActive (token) {
+  let where = {$and: [{ token }, { expired: 0 }, { expireAt: { $gte: Date.now() } }]}
+  return Token.findOne(where);
+}
+
+async function disableToken(token){
+  await Token.findOneAndUpdate({token}, { $set: {expired: 1, expireAt: Date.now()}}, {});
+  return Token.findOne({token});
+}
+
 module.exports = {
 
   /**
@@ -43,6 +53,7 @@ module.exports = {
    * @returns {Promise<data>}
    */
   createToken: async (data) => {
+    if(!data.hasOwnProperty("expireAt") || _.isEmpty(data.expireAt)) data.expireAt = await utils.makeTokenDate()
     if(_.isEmpty(data.token)) data.token = await generateToken()
     return Token.create(data);
   },
@@ -51,10 +62,18 @@ module.exports = {
     return Token.findOne(where);
   },
 
+  tokenIsActive: async (token) => {
+    return await tokenIsActive(token);
+  },
+
+  disableToken: async (token) => {
+    return await disableToken(token);
+  },
+
   processToken: async (obj) => {
-    let find = await Token.findOne(obj.where);
+    let find = await Token.findOne({token: obj.token});
     if(!_.isEmpty(find)){
-      if(find.expired === 1) return {result: {}, message: `Token provided is expired!`}
+      if(!await tokenIsActive(obj.token)) return {result: {}, message: `Token provided is expired!`}
       if(!find.data.hasOwnProperty(obj.dataColumn)) return {result: {}, message: `${obj.dataColumn} object is invalid!`}
       return {result: find, message: `success`}
     }else{

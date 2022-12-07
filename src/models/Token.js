@@ -11,7 +11,10 @@ const oSchema = new mongoose.Schema({
             type: Number,
             default: 0
         },
-        expiredAt: Date,
+        expireAt: {
+            type: Date,
+            default: Date.now
+        }
     },
     { timestamps: true }
 );

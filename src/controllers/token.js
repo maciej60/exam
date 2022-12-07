@@ -24,7 +24,7 @@ let subjectHelperUpdate = helper.TokenHelper.findUpdate;
  */
 exports.add = asyncHandler(async (req, res, next) => {
   try{
-    let { token, data } = req.body;
+    let { token, data, expireAt } = req.body;
     if (!token) {
       return utils.send_json_error_response({
         res,
@@ -43,7 +43,7 @@ exports.add = asyncHandler(async (req, res, next) => {
         statusCode: 400
       });
     }
-    let subjectContainer = { token, data }
+    let subjectContainer = { token, data, expireAt }
     let add_token = await subjectHelperCreate(subjectContainer);
     if(add_token){
       await logger.filecheck(
@@ -70,7 +70,7 @@ exports.add = asyncHandler(async (req, res, next) => {
     return utils.send_json_error_response({
       res,
       data: [],
-      msg: `System menu create failed with error ${error.message}`,
+      msg: `Token create failed with error ${error.message}`,
       errorCode: "TOK02",
       statusCode: 500
     });
@@ -129,6 +129,104 @@ exports.getToken = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc isActive
+ * @route POST /api/v2/token/status
+ * @access PUBLIC
+ */
+exports.isActive = asyncHandler(async (req, res, next) => {
+  try{
+    const { token } = req.body;
+    if (!token) {
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "Token is not provided",
+        errorCode: "TOK03",
+        statusCode: 400
+      });
+    }
+    const obj = await helper.TokenHelper.tokenIsActive(token);
+    if(!_.isEmpty(obj)) {
+      await logger.filecheck(
+          `INFO: Token status is ${JSON.stringify(
+              obj
+          )} \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: true,
+        msg: "Token is active",
+        statusCode: 200
+      });
+    }else{
+      return utils.send_json_error_response({
+        res,
+        data: false,
+        msg:  `Token is not active or expired!`,
+        errorCode: "TOK04",
+        statusCode: 404
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg:  `Token status check failed with error ${error.message}`,
+      errorCode: "TOK05",
+      statusCode: 500
+    });
+  }
+});
+
+/**
+ * @desc disable
+ * @route POST /api/v2/token/disable
+ * @access PUBLIC
+ */
+exports.disable = asyncHandler(async (req, res, next) => {
+  try{
+    const { token } = req.body;
+    if (!token) {
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "Token is not provided",
+        errorCode: "TOK03",
+        statusCode: 400
+      });
+    }
+    const obj = await helper.TokenHelper.disableToken(token);
+    if(!_.isEmpty(obj)) {
+      await logger.filecheck(
+          `INFO: Token disabled \n`
+      );
+      return utils.send_json_response({
+        res,
+        data: obj,
+        msg: "Token is disabled",
+        statusCode: 200
+      });
+    }else{
+      return utils.send_json_error_response({
+        res,
+        data: false,
+        msg:  `Token not disabled!`,
+        errorCode: "TOK04",
+        statusCode: 404
+      });
+    }
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg:  `Token disability failed with error ${error.message}`,
+      errorCode: "TOK05",
+      statusCode: 500
+    });
+  }
+});
+
+/**
  * @desc Token
  * @route POST /api/v2/token/update
  * @access PUBLIC
@@ -150,8 +248,8 @@ exports.update = asyncHandler(async (req, res) => {
         errorCode: "TOK06",
         statusCode: 406
       });
-    const {token, expired, data} = req.body;
-    const subjectContainer = _.isEmpty(data) ? {expired, expiredAt: Date.now()} : {expired, expiredAt: Date.now(), data};
+    let {token, expired, data} = req.body;
+    const subjectContainer = _.isEmpty(data) ? {expired} : {expired, data};
     const update = await subjectHelperUpdate({
       filter: {
         token,
