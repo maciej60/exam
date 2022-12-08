@@ -14,7 +14,6 @@ async function access(req, action){
     if(req.body.institutionId){
       let institution = await helper.InstitutionHelper.getInstitution({ _id: new ObjectId(req.body.institutionId) });
       if(institution){
-        institution = institution[0]
         institutionCode = institution.institutionCode
         dir = `${appRoot}/public/uploads/institutions/${institutionCode}/candidates`
         return true;
@@ -77,7 +76,6 @@ async function access(req, action){
         _id: new ObjectId(req.body.id),
       });
       if (institution) {
-        institution = institution[0];
         institutionCode = institution.institutionCode;
         dir = `${appRoot}/public/uploads/institutions/${institutionCode}/logo`;
         return true;

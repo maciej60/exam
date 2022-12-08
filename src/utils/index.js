@@ -335,11 +335,11 @@ module.exports = {
       firstName = nameArr[1]
       lastName = nameArr[0]
     }else if(nameArr.length === 2){
-      middleName = ""
+      middleName = middleNamePad
       firstName = nameArr[1]
       lastName = nameArr[0]
     }else if(nameArr.length === 1){
-      middleName = ""
+      middleName = middleNamePad
       firstName = firstNamePad
       lastName = nameArr[0]
     }

@@ -133,7 +133,7 @@ obj = await utils.pickFromShuffledArray(arr, 10, 2);*/
    * lsof -i tcp:3009
    * kill -9 <pid>
    */
-  let name = "emeka  "
+  let name = "  "
   name = name.replace(/^\s+|\s+$/g, "");
   let nameArr = name.split(" ")
   let lastName, firstName, middleName;

@@ -390,11 +390,9 @@ exports.update = asyncHandler(async (req, res) => {
     validationSchema = Joi.object({
       name: Joi.string().min(5).max(50).required(),
       phone: Joi.string().min(11).max(15),
-      email: Joi.string().min(5).max(50).email().required(),
       address: Joi.string().min(10).max(100).required(),
       businessId: Joi.string(),
-      logo: Joi.string(),
-      institutionConfig: Joi.object(),
+      institutionConfig: Joi.any(),
       modules: Joi.any(),
       id: Joi.string()
     });
@@ -409,10 +407,14 @@ exports.update = asyncHandler(async (req, res) => {
         statusCode: 500
       });
     console.log("begin update")
-    const filePath = path.normalize(req.file.path);
-    const fileName = path.basename(filePath).toLocaleLowerCase();
-    const {name, phone, address, email, logo, modules, institutionConfig, id} = req.body;
-    const data = {name, phone, address, email, logo: fileName, modules, institutionConfig};
+    let fileName = "";
+    if(req.file){
+      const filePath = path.normalize(req.file.path);
+      fileName = path.basename(filePath).toLocaleLowerCase();
+    }
+    let {name, phone, address, modules, institutionConfig, id} = req.body;
+    institutionConfig = JSON.parse(institutionConfig)
+    const data = {name, phone, address, logo: fileName, modules, institutionConfig};
     const ObjectId = require("mongoose").Types.ObjectId;
     if(!await utils.isValidObjectId(id))
       return utils.send_json_error_response({
