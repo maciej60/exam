@@ -11,6 +11,7 @@ const generator = require('generate-password'); */
 const moment = require("moment"); 
 const { url } = require('inspector');
 const XLSX = require("xlsx");
+const {process_params} = require("express/lib/router");
 const time = new Date(Date.now()).toLocaleString();
 
 function twoDigits(d) {
@@ -316,6 +317,33 @@ module.exports = {
       return false;
     }
     return false;
+  },
+
+  parseNameToFirstLastMiddle: async (params) => {
+    if(_.isEmpty(params.name)) return false;
+    let name = params.name.replace(/^\s+|\s+$/g, "");
+    let firstNamePad = params.firstNamePad;
+    let middleNamePad = params.middleNamePad;
+    let nameArr = name.split(" ")
+    let lastName, firstName, middleName;
+    if(nameArr.length > 3){
+      middleName = name.split(" ").slice(2).join(" ");
+      firstName = nameArr[1]
+      lastName = nameArr[0]
+    }else if(nameArr.length === 3){
+      middleName = nameArr[2]
+      firstName = nameArr[1]
+      lastName = nameArr[0]
+    }else if(nameArr.length === 2){
+      middleName = ""
+      firstName = nameArr[1]
+      lastName = nameArr[0]
+    }else if(nameArr.length === 1){
+      middleName = ""
+      firstName = firstNamePad
+      lastName = nameArr[0]
+    }
+    return {lastName, firstName, middleName}
   },
 
   getShufflingFrequency: () => {

@@ -123,9 +123,6 @@ exports.add = asyncHandler(async (req, res, next) => {
      */
     validationSchema = Joi.object({
       name: Joi.string().min(5).max(50).required(),
-      firstName: Joi.string().required(),
-      lastName: Joi.string().required(),
-      middleName: Joi.string().allow(null, ''),
       phone: Joi.string().min(11).max(15),
       address: Joi.string().min(10).max(100).required(),
       businessId: Joi.string(),
@@ -145,7 +142,7 @@ exports.add = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     if(req.user) createdBy = req.user.id || null;
-    let {name, phone, address, businessId, logo, modules, url, token, lastName, firstName, middleName} = req.body;
+    let {name, phone, address, businessId, logo, modules, url, token} = req.body;
     if(!await utils.isValidObjectId(businessId))
       return utils.send_json_error_response({
         res,
@@ -220,6 +217,10 @@ exports.add = asyncHandler(async (req, res, next) => {
       symbols: false,
     });
     let pw_hashed = await utils.hashPassword(pw);
+    let nameArr = await utils.parseNameToFirstLastMiddle({name, firstNamePad: "Institution", middleNamePad: ""})
+    let lastName = nameArr.lastName
+    let firstName = nameArr.firstName
+    let middleName = nameArr.middleName
     let user_data = {
       phone,
       email,

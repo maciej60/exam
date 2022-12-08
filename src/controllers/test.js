@@ -133,85 +133,28 @@ obj = await utils.pickFromShuffledArray(arr, 10, 2);*/
    * lsof -i tcp:3009
    * kill -9 <pid>
    */
-  obj =[
-    {
-      id: "1",
-      title: "user",
-      icon: "FileTextIcon",
-      children: [
-        {
-          title: "user child 1",
-          route: "api-user",
-          id: "1.1",
-          status: false,
-        },
-        {
-          title: "user child 2",
-          route: "api-user-2",
-          id: "1.2",
-          status: false,
-        },
-        {
-          title: "user child 3",
-          route: "api-user-3",
-          id: "1.3",
-          status: false,
-        },
-      ],
-    },
-    {
-      id: "2",
+  let name = "emeka  "
+  name = name.replace(/^\s+|\s+$/g, "");
+  let nameArr = name.split(" ")
+  let lastName, firstName, middleName;
+  if(nameArr.length > 3){
+    middleName = name.split(" ").slice(2).join(" ");
+    firstName = nameArr[1]
+    lastName = nameArr[0]
+  }else if(nameArr.length === 3){
+    middleName = nameArr[2]
+    firstName = nameArr[1]
+    lastName = nameArr[0]
+  }else if(nameArr.length === 2){
+    middleName = ""
+    firstName = nameArr[1]
+    lastName = nameArr[0]
+  }else if(nameArr.length === 1){
+    middleName = ""
+    firstName = "Institution"
+    lastName = nameArr[0]
+  }
 
-      title: "user2",
-      icon: "FileTextIcon",
-      children: [
-        {
-          title: "user2 child 1",
-          route: "api-user2-1",
-          id: "2.1",
-          status: false,
-        },
-        {
-          title: "user2 child 2",
-          route: "api-user2-2",
-          id: "2.2",
-          status: false,
-        },
-        {
-          title: "user2 child 3",
-          route: "api-user2-3",
-          id: "2.3",
-          status: false,
-        },
-        {
-          title: "nested user",
-          icon: "FileTextIcon",
-          id: "2.4",
-          status: false,
-
-          children: [
-            {
-              title: "nested user child 1",
-              route: "api-user-child-1",
-              id: "2.4.1",
-              status: false,
-            },
-            {
-              title: "nested user child 2",
-              route: "api-user-child-2",
-              id: "2.4.2",
-              status: false,
-            },
-            {
-              title: "nested user child 3",
-              route: "api-user-child-3",
-              id: "2.4.3",
-              status: false,
-            },
-          ],
-        },
-      ],
-    },
-  ];
+  obj = {lastName, firstName, middleName}
   return res.status(200).json(obj);
 });
