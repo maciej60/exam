@@ -417,7 +417,7 @@ exports.update = asyncHandler(async (req, res) => {
       );
     }
     let {name, phone, address, modules, institutionConfig, id} = req.body;
-    institutionConfig = JSON.parse(institutionConfig)
+    if(institutionConfig) institutionConfig = JSON.parse(institutionConfig)
     const data = {name, phone, address, logo: fileName, modules, institutionConfig};
     const ObjectId = require("mongoose").Types.ObjectId;
     if(!await utils.isValidObjectId(id))
