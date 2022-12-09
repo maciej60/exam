@@ -411,6 +411,10 @@ exports.update = asyncHandler(async (req, res) => {
     if(req.file){
       const filePath = path.normalize(req.file.path);
       fileName = path.basename(filePath).toLocaleLowerCase();
+    }else{
+      await logger.filecheck(
+          `INFO: ${subjectPascal} update by: ${createdBy}, at ${time} failed: file not uploaded \n`
+      );
     }
     let {name, phone, address, modules, institutionConfig, id} = req.body;
     institutionConfig = JSON.parse(institutionConfig)

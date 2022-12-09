@@ -5,6 +5,7 @@ const helper = require("../utils/model_helpers");
 const utils = require("../utils");
 const fs = require('fs');
 const _ = require("lodash");
+const logger = require("../utils/logger");
 const ObjectId = require("mongoose").Types.ObjectId;
 let msg, institutionCode, candidateCode, dir, dynamicFileName;
 let fl = [];
@@ -97,6 +98,7 @@ module.exports = {
         let paramsInitialized = await access(req, "uploadCandidateCsv")
         if(!paramsInitialized) {
           msg = `Params to initialize store not present!`
+          await logger.filecheck(`ERROR: ${msg}  \n`);
           cb(null, false);
           return msg;
         }
@@ -106,11 +108,23 @@ module.exports = {
         cb(null, dir);
       },
       filename: async (req, file, cb) => {
-        const ext = path.extname(file.originalname).toLocaleLowerCase();
-        cb(null, `${file.fieldname}-${Date.now()}${ext}`);
+        if(institutionCode){
+          const ext = path.extname(file.originalname).toLocaleLowerCase();
+          cb(null, `${file.fieldname}-${Date.now()}${ext}`);
+        }else{
+          msg = `Institution not found, ID provided invalid!`
+          await logger.filecheck(`ERROR: ${msg}  \n`);
+          cb(null, false);
+        }
       },
     }),
     fileFilter: async function (req, file, cb) {
+      if(!institutionCode){
+        msg = `InstitutionId provided is wrong!`;
+        await logger.filecheck(`ERROR: ${msg}  \n`);
+        cb(null, false);
+        return msg;
+      }
       if (
           file.mimetype.split("/")[1] === "csv" ||
           file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
@@ -119,17 +133,20 @@ module.exports = {
         if (file.fieldname === "csvFile") {
           if(!req.body.institutionId){
             msg = `Institution not provide, please re-arrange the body params to come before file`
+            await logger.filecheck(`ERROR: ${msg}  \n`);
             cb(null, false);
             return msg;
           }
           cb(null, true);
         } else {
           msg = `File field is not correct`
+          await logger.filecheck(`ERROR: ${msg}  \n`);
           cb(null, false);
           return msg;
         }
       } else {
         msg = `Upload csv or an excel file`
+        await logger.filecheck(`ERROR: ${msg}  \n`);
         cb(null, false);
         return msg;
       }
@@ -145,6 +162,7 @@ module.exports = {
         let paramsInitialized = await access(req, "uploadCandidatePhoto")
         if(!paramsInitialized) {
           msg = `Params to initialize store not present!`
+          await logger.filecheck(`ERROR: ${msg}  \n`);
           cb(null, false);
           return msg;
         }
@@ -154,11 +172,23 @@ module.exports = {
         cb(null, dir);
       },
       filename: async (req, file, cb) => {
-        const ext = path.extname(file.originalname).toLocaleLowerCase();
-        cb(null, `${candidateCode.toLocaleLowerCase()}${ext}`);
+        if(!candidateCode){
+          msg = `Candidate not found, ID provided invalid!`
+          await logger.filecheck(`ERROR: ${msg}  \n`);
+          cb(null, false);
+        }else{
+          const ext = path.extname(file.originalname).toLocaleLowerCase();
+          cb(null, `${candidateCode.toLocaleLowerCase()}${ext}`);
+        }
       },
     }),
     fileFilter: async function (req, file, cb) {
+      if(!candidateCode){
+        msg = `CandidateId provided is wrong!`;
+        await logger.filecheck(`ERROR: ${msg}  \n`);
+        cb(null, false);
+        return msg;
+      }
       const types = /png|jpg|jpeg|webp|gif|svg/
       const extName = types.test(path.extname(file.originalname).toLocaleLowerCase())
       const mimetype = types.test(file.mimetype)
@@ -167,22 +197,26 @@ module.exports = {
           if (file.fieldname === "photoUrl") {
             if(!req.body.id){
               msg = `Candidate not provided, please re-arrange the body params to come before file`
+              await logger.filecheck(`ERROR: ${msg}  \n`);
               cb(null, false);
               return msg;
             }
             cb(null, true);
           } else {
             msg = `File field name is not correct`
+            await logger.filecheck(`ERROR: ${msg}  \n`);
             cb(null, false);
             return msg;
           }
         } else {
           msg = `Upload an image file`
+          await logger.filecheck(`ERROR: ${msg}  \n`);
           cb(null, false);
           return msg;
         }
       }else{
         msg = "Only supported png,jpeg,jpg,gif and svg format image"
+        await logger.filecheck(`ERROR: ${msg}  \n`);
         cb(null, false);
         return msg;
       }
@@ -198,6 +232,7 @@ module.exports = {
         let paramsInitialized = await access(req, "uploadCandidateDocuments")
         if(!paramsInitialized) {
           msg = `Params to initialize store not present!`
+          await logger.filecheck(`ERROR: ${msg}  \n`);
           cb(null, false);
         }
         if (!fs.existsSync(dir)){
@@ -219,6 +254,12 @@ module.exports = {
     fileFilter: async function (req, file, cb) {
       dynamicFileName = ""
       await access(req, "uploadCandidateDocuments")
+      if(!institutionCode || candidateCode){
+        msg = `InstitutionId or candidateCode provided is wrong!`;
+        await logger.filecheck(`ERROR: ${msg}  \n`);
+        cb(null, false);
+        return msg;
+      }
       const fieldName = file.fieldname.toLocaleLowerCase()
       const extName = path.extname(file.originalname).toLocaleLowerCase()
       const name = file.originalname.toLocaleLowerCase()
@@ -247,9 +288,11 @@ module.exports = {
               return;
             }else{
               msg = "Only supported png,jpeg,jpg,gif and svg format image"
+              await logger.filecheck(`ERROR: ${msg}  \n`);
             }
           }else{
             msg = `Upload an image file`
+            await logger.filecheck(`ERROR: ${msg}  \n`);
           }
         }
         if(t.indexOf("pdf") > -1){
@@ -262,9 +305,11 @@ module.exports = {
               return;
             }else{
               msg = "Only supported .pdf format"
+              await logger.filecheck(`ERROR: ${msg}  \n`);
             }
           }else{
             msg = `Upload a pdf file`
+            await logger.filecheck(`ERROR: ${msg}  \n`);
           }
         }
         if(t.indexOf("word") > -1){
@@ -280,9 +325,11 @@ module.exports = {
               return;
             }else{
               msg = "Only supported .doc, doc format"
+              await logger.filecheck(`ERROR: ${msg}  \n`);
             }
           }else{
             msg = `Upload a word file`
+            await logger.filecheck(`ERROR: ${msg}  \n`);
           }
         }
         if(t.indexOf("spreadsheet") > -1){
@@ -299,14 +346,17 @@ module.exports = {
               return;
             }else{
               msg = "Only supported .xlsx, xls, csv format"
+              await logger.filecheck(`ERROR: ${msg}  \n`);
             }
           }else{
             msg = `Upload an excel or csv file`
+            await logger.filecheck(`ERROR: ${msg}  \n`);
           }
         }
         cb(null, false);
       }else{
         msg = `File not allowed for this application`
+        await logger.filecheck(`ERROR: ${msg}  \n`);
         cb(null, false);
       }
     },
@@ -321,6 +371,7 @@ module.exports = {
         let paramsInitialized = await access(req, "institutionLogo");
         if (!paramsInitialized) {
           msg = `Params to initialize store not present!`;
+          await logger.filecheck(`ERROR: ${msg}  \n`);
           cb(null, false);
           return msg;
         }
@@ -330,11 +381,23 @@ module.exports = {
         cb(null, dir);
       },
       filename: async (req, file, cb) => {
-        const ext = path.extname(file.originalname).toLocaleLowerCase();
-        cb(null, `${institutionCode.toLocaleLowerCase()}${ext}`);
+        if(institutionCode){
+          const ext = path.extname(file.originalname).toLocaleLowerCase();
+          cb(null, `${institutionCode.toLocaleLowerCase()}${ext}`);
+        }else{
+          msg = "Institution not found"
+          await logger.filecheck(`ERROR: ${msg}  \n`);
+          cb(null, false);
+        }
       },
     }),
     fileFilter: async function (req, file, cb) {
+      if(!institutionCode){
+        msg = `InstitutionId provided is wrong!`;
+        await logger.filecheck(`ERROR: ${msg}  \n`);
+        cb(null, false);
+        return msg;
+      }
       const types = /png|jpg|jpeg|webp|gif|svg/;
       const extName = types.test(
           path.extname(file.originalname).toLocaleLowerCase()
@@ -345,22 +408,26 @@ module.exports = {
           if (file.fieldname === "institutionLogo") {
             if (!req.body.id) {
               msg = `Logo not provided, please re-arrange the body params to come before file`;
+              await logger.filecheck(`ERROR: ${msg}  \n`);
               cb(null, false);
               return msg;
             }
             cb(null, true);
           } else {
             msg = `File field name is not correct`;
+            await logger.filecheck(`ERROR: ${msg}  \n`);
             cb(null, false);
             return msg;
           }
         } else {
           msg = `Upload an image file`;
+          await logger.filecheck(`ERROR: ${msg}  \n`);
           cb(null, false);
           return msg;
         }
       } else {
         msg = "Only supported png,jpeg,jpg,gif and svg format image";
+        await logger.filecheck(`ERROR: ${msg}  \n`);
         cb(null, false);
         return msg;
       }
