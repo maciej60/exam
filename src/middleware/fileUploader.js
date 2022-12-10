@@ -7,7 +7,7 @@ const fs = require('fs');
 const _ = require("lodash");
 const logger = require("../utils/logger");
 const ObjectId = require("mongoose").Types.ObjectId;
-let msg, institutionCode, candidateCode, dir, dynamicFileName;
+let msg, institutionCode, candidateCode, dir, dynamicFileName, paramsInitialized;
 let fl = [];
 
 async function access(req, action){
@@ -76,6 +76,7 @@ async function access(req, action){
       let institution = await helper.InstitutionHelper.getInstitution({
         _id: new ObjectId(req.body.id),
       });
+      console.log(institution)
       if (institution) {
         institutionCode = institution.institutionCode;
         dir = `${appRoot}/public/uploads/institutions/${institutionCode}/logo`;
@@ -95,7 +96,6 @@ module.exports = {
   uploadCandidateCsv: multer({
     storage: multer.diskStorage({
       destination: async (req, file, cb) => {
-        let paramsInitialized = await access(req, "uploadCandidateCsv")
         if(!paramsInitialized) {
           msg = `Params to initialize store not present!`
           await logger.filecheck(`ERROR: ${msg}  \n`);
@@ -119,6 +119,7 @@ module.exports = {
       },
     }),
     fileFilter: async function (req, file, cb) {
+      paramsInitialized = await access(req, "uploadCandidateCsv")
       if(!institutionCode){
         msg = `InstitutionId provided is wrong!`;
         await logger.filecheck(`ERROR: ${msg}  \n`);
@@ -159,7 +160,6 @@ module.exports = {
   uploadCandidatePhoto: multer({
     storage: multer.diskStorage({
       destination: async (req, file, cb) => {
-        let paramsInitialized = await access(req, "uploadCandidatePhoto")
         if(!paramsInitialized) {
           msg = `Params to initialize store not present!`
           await logger.filecheck(`ERROR: ${msg}  \n`);
@@ -183,6 +183,7 @@ module.exports = {
       },
     }),
     fileFilter: async function (req, file, cb) {
+      paramsInitialized = await access(req, "uploadCandidatePhoto")
       if(!candidateCode){
         msg = `CandidateId provided is wrong!`;
         await logger.filecheck(`ERROR: ${msg}  \n`);
@@ -229,7 +230,6 @@ module.exports = {
   uploadCandidateDocuments: multer({
     storage: multer.diskStorage({
       destination: async (req, file, cb) => {
-        let paramsInitialized = await access(req, "uploadCandidateDocuments")
         if(!paramsInitialized) {
           msg = `Params to initialize store not present!`
           await logger.filecheck(`ERROR: ${msg}  \n`);
@@ -252,8 +252,8 @@ module.exports = {
       },
     }),
     fileFilter: async function (req, file, cb) {
+      paramsInitialized = await access(req, "uploadCandidateDocuments")
       dynamicFileName = ""
-      await access(req, "uploadCandidateDocuments")
       if(!institutionCode || candidateCode){
         msg = `InstitutionId or candidateCode provided is wrong!`;
         await logger.filecheck(`ERROR: ${msg}  \n`);
@@ -368,7 +368,6 @@ module.exports = {
   uploadInstitutionLogo: multer({
     storage: multer.diskStorage({
       destination: async (req, file, cb) => {
-        let paramsInitialized = await access(req, "institutionLogo");
         if (!paramsInitialized) {
           msg = `Params to initialize store not present!`;
           await logger.filecheck(`ERROR: ${msg}  \n`);
@@ -392,6 +391,7 @@ module.exports = {
       },
     }),
     fileFilter: async function (req, file, cb) {
+      paramsInitialized = await access(req, "institutionLogo");
       if(!institutionCode){
         msg = `InstitutionId provided is wrong!`;
         await logger.filecheck(`ERROR: ${msg}  \n`);

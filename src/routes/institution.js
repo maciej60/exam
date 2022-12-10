@@ -3,6 +3,7 @@ const {
     setup,
     add,
     update,
+    logo,
     list,
     remove,
     addDocType,
@@ -18,7 +19,8 @@ const { uploadInstitutionLogo } = require("../middleware/fileUploader");
 
 router.post('/setup', setup);
 router.post('/add', add);
-router.post("/update", protect, uploadInstitutionLogo.single("institutionLogo"), update);
+router.post("/update", protect, update);
+router.post("/logo", protect, uploadInstitutionLogo.single("institutionLogo"), logo);
 router.post("/list", protect, list);
 router.post("/delete", protect, remove);
 router.post("/addDocType", protect, addDocType);

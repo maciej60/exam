@@ -407,18 +407,8 @@ exports.update = asyncHandler(async (req, res) => {
         statusCode: 500
       });
     console.log("begin update")
-    let fileName = "";
-    if(req.file){
-      const filePath = path.normalize(req.file.path);
-      fileName = path.basename(filePath).toLocaleLowerCase();
-    }else{
-      await logger.filecheck(
-          `INFO: ${subjectPascal} update by: ${createdBy}, at ${time} failed: file not uploaded \n`
-      );
-    }
     let {name, phone, address, modules, institutionConfig, id} = req.body;
-    if(institutionConfig) institutionConfig = JSON.parse(institutionConfig)
-    const data = {name, phone, address, logo: fileName, modules, institutionConfig};
+    const data = {name, phone, address, modules, institutionConfig};
     const ObjectId = require("mongoose").Types.ObjectId;
     if(!await utils.isValidObjectId(id))
       return utils.send_json_error_response({
@@ -450,6 +440,89 @@ exports.update = asyncHandler(async (req, res) => {
       data: update.result,
       statusCode: 201
     });
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Error: ${error} `,
+      errorCode: "INS07",
+      statusCode: 500
+    });
+  }
+});
+
+/**
+ * @desc Institution
+ * @route POST /api/v2/institution/logo
+ * @access PUBLIC
+ */
+exports.logo = asyncHandler(async (req, res) => {
+  let createdBy = req.user.id;
+  let validationSchema;
+  try {
+    validationSchema = Joi.object({
+      id: Joi.string()
+    });
+    const { error } = validationSchema.validate(req.body);
+    const { id } = req.body;
+    if (error)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `${subjectPascal} logo upload validation failed with error: ${error.details[0].message}`,
+        errorCode: "INS06",
+        statusCode: 500
+      });
+    if(!await utils.isValidObjectId(id))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
+    console.log("begin update")
+    let fileName = "";
+    if(req.file){
+      console.log(req.file)
+      const filePath = path.normalize(req.file.path);
+      fileName = path.basename(filePath).toLocaleLowerCase();
+      const data = { logo: fileName };
+      const ObjectId = require("mongoose").Types.ObjectId;
+      const update = await subjectHelperUpdate({
+        filter: {
+          _id: new ObjectId(id),
+        },
+        update: {
+          $set: data,
+        },
+        options: { upsert: true, new: true },
+      });
+      if (!update.result)
+        return utils.send_json_error_response({
+          res,
+          data: update.result,
+          msg: update.message,
+          errorCode: "INS06",
+          statusCode: 500
+        });
+      return utils.send_json_response({
+        res,
+        data: update.result,
+        statusCode: 201
+      });
+    }else{
+      await logger.filecheck(
+          `INFO: ${subjectPascal} update by: ${createdBy}, at ${time} failed: file not uploaded \n`
+      );
+      return utils.send_json_error_response({
+        res,
+        data: {},
+        msg: `File not uploaded`,
+        errorCode: "INS06",
+        statusCode: 500
+      });
+    }
   } catch (error) {
     return utils.send_json_error_response({
       res,
