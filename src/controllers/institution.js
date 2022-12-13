@@ -125,11 +125,7 @@ exports.add = asyncHandler(async (req, res, next) => {
       name: Joi.string().min(5).max(50).required(),
       phone: Joi.string().min(11).max(15),
       address: Joi.string().min(10).max(100).required(),
-      businessId: Joi.string(),
-      logo: Joi.string().allow(null, ''),
-      url: Joi.string(),
-      institutionConfig: Joi.object(),
-      modules: Joi.any(),
+      password: Joi.string(),
       token: Joi.string(),
     });
     const {error} = validationSchema.validate(req.body);
@@ -142,15 +138,16 @@ exports.add = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     if(req.user) createdBy = req.user.id || null;
-    let {name, phone, address, businessId, logo, modules, url, token} = req.body;
-    if(!await utils.isValidObjectId(businessId))
+    let {name, phone, address, password, token} = req.body;
+    if (!(await utils.passwordPolicyPassed(password))) {
       return utils.send_json_error_response({
         res,
         data: [],
-        msg:  "Business provided is invalid",
-        errorCode: "MEN17",
+        msg: `Password should contain a letter, number, upper, lower, special character and greater than 8!`,
+        errorCode: "AUTH09",
         statusCode: 406
       });
+    }
     let process_token = await helper.TokenHelper.processToken({token, dataColumn: "email"})
     if(_.isEmpty(process_token.result) || process_token.message !== 'success')
       return utils.send_json_error_response({
@@ -162,6 +159,7 @@ exports.add = asyncHandler(async (req, res, next) => {
       });
     let institutionCode = await helper.InstitutionHelper.generateInstitutionCode()
     let email = process_token.result.data.email;
+    let url = process_token.result.data.url;
     const check_user = await helper.UserHelper.getUser({
       $or: [{ email }, { phone }],
     });
@@ -190,10 +188,7 @@ exports.add = asyncHandler(async (req, res, next) => {
       email,
       address,
       institutionCode,
-      createdBy,
-      businessId,
-      logo,
-      modules
+      createdBy
     };
     const create = await subjectHelperCreate(subjectContainer);
     if(!create)
@@ -209,14 +204,7 @@ exports.add = asyncHandler(async (req, res, next) => {
             create
         )} \n`
     );
-    let pw = generator.generate({
-      length: 10,
-      numbers: true,
-      uppercase: true,
-      lowercase: true,
-      symbols: false,
-    });
-    let pw_hashed = await utils.hashPassword(pw);
+    let pw_hashed = await utils.hashPassword(password);
     let nameArr = await utils.parseNameToFirstLastMiddle({name, firstNamePad: "Institution", middleNamePad: ""})
     let lastName = nameArr.lastName
     let firstName = nameArr.firstName
@@ -230,7 +218,7 @@ exports.add = asyncHandler(async (req, res, next) => {
       password: pw_hashed,
       institutionId:create._id,
       isInstitutionAdmin: 1,
-      firstLogin: 1,
+      firstLogin: 2,
       status: 1,
     };
     const create_user = await helper.UserHelper.createUser(user_data);
@@ -248,7 +236,7 @@ exports.add = asyncHandler(async (req, res, next) => {
         previewText: "Exam portal is good!",
         emailPhone,
         email,
-        password: pw,
+        password,
         message: "Use the details provided to login to the account as the Institution Admin to configure the institution and add staffs.",
         institutionCode,
         institutionName: name,
@@ -530,6 +518,72 @@ exports.logo = asyncHandler(async (req, res) => {
       msg: `Error: ${error} `,
       errorCode: "INS07",
       statusCode: 500
+    });
+  }
+});
+
+/**
+ * @desc Institution
+ * @route POST /api/v2/institution/logo
+ * @access PUBLIC
+ */
+exports.logoUrl = asyncHandler(async (req, res, next) => {
+  let validationSchema;
+  try {
+    /**
+     * validate request body
+     * @type {Joi.ObjectSchema<any>}
+     */
+    validationSchema = Joi.object({
+      id: Joi.string().required(),
+    });
+    const { error } = validationSchema.validate(req.body);
+    if (error)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `${subjectPascal} logoUrl validation failed with error: ${error.details[0].message}`,
+        errorCode: "INS01",
+        statusCode: 406,
+      });
+    const ObjectId = require("mongoose").Types.ObjectId;
+    let { id } = req.body;
+    if(!await utils.isValidObjectId(id))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
+    let where = {_id: new ObjectId(id)};
+    const institution = await helper.InstitutionHelper.getInstitution(where);
+    if (!institution) {
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Institution not found!`,
+        errorCode: "INS03",
+        statusCode: 404,
+      });
+    }
+    const code = institution.institutionCode;
+    const logo = institution.logo;
+    const url = new URL(`${req.protocol}://${req.get('host')}/institutions/${code}/logo/${logo}`);
+    //return res.sendFile(`${appRoot}/public/uploads/institutions/${code}/logo/${logo}`)
+    return utils.send_json_response({
+      res,
+      data: {url},
+      msg: `Institution Logo fetched successfully.`,
+      statusCode: 200,
+    });
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Institution logoUrl fetch failed with error ${error.message}`,
+      errorCode: "INS02",
+      statusCode: 500,
     });
   }
 });

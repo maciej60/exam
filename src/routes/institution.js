@@ -4,6 +4,7 @@ const {
     add,
     update,
     logo,
+    logoUrl,
     list,
     remove,
     addDocType,
@@ -21,6 +22,7 @@ router.post('/setup', setup);
 router.post('/add', add);
 router.post("/update", protect, update);
 router.post("/logo", protect, uploadInstitutionLogo.single("institutionLogo"), logo);
+router.post("/logoUrl", protect, logoUrl);
 router.post("/list", protect, list);
 router.post("/delete", protect, remove);
 router.post("/addDocType", protect, addDocType);

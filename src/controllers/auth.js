@@ -17,28 +17,40 @@ const time = new Date(Date.now()).toLocaleString();
  * @route POST /api/v2/auth/login
  * @access PUBLIC
  */
-
 exports.login = asyncHandler(async (req, res, next) => {
-  const { login, password } = req.body;
-  if (!login || !password) {
+  const { login, password, loginType } = req.body;
+  if (!login || !password || !loginType) {
     return utils.send_json_error_response({
       res,
       data: [],
-      msg: `Email/Phone and password is required`,
+      msg: `Email/Phone, password, and Type is required `,
       errorCode: "AUTH01",
-      statusCode: 400
+      statusCode: 400,
     });
   }
-  const check_user = await helper.UserHelper.getUser({
-    $or: [{ email: login }, { phone: login }],
-  });
+  let check_user;
+  if (
+      loginType === "institution" ||
+      loginType === "sysAdmin" ||
+      loginType === "staff"
+  ) {
+    check_user = await helper.UserHelper.getUser({
+      $or: [{ email: login }, { phone: login }],
+    });
+  } else if (loginType === "candidate") {
+    check_user = await helper.CandidateHelper.getCandidate({
+      $or: [{ email: login }, { phone: login }],
+    });
+  }else{
+    check_user = null;
+  }
   if (!check_user) {
     return utils.send_json_error_response({
       res,
       data: [],
-      msg: `Email or password is incorrect, user not found`,
+      msg: `Email or password is incorrect, ${loginType} record not found`,
       errorCode: "AUTH02",
-      statusCode: 404
+      statusCode: 404,
     });
   }
   const isMatch = await utils.comparePassword(password, check_user.password);
@@ -46,15 +58,14 @@ exports.login = asyncHandler(async (req, res, next) => {
     return utils.send_json_error_response({
       res,
       data: [],
-      msg: `Email or password is incorrect, user not found`,
+      msg: `Email or password is incorrect, ${loginType} not found`,
       errorCode: "AUTH03",
-      statusCode: 404
+      statusCode: 404,
     });
   }
-  const get_user = await helper.UserHelper.getUser(check_user._id);
   if (check_user.firstLogin === 1) {
-    utils.sendNoTokenResponse(
-        get_user,
+    return utils.sendNoTokenResponse(
+        check_user,
         200,
         res,
         "First time login, kindly change your password",
@@ -70,7 +81,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   if (check_user.isLmsAdmin === 1) {
 
   }
-  utils.sendTokenResponse({user: get_user}, 200, res, "User login successful");
+  return utils.sendTokenResponse({user: check_user}, 200, res, `${loginType} login successful`);
 });
 
 /**

@@ -122,17 +122,35 @@ exports.addInstitutionMenu = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     }
-    let institutionMenuData = {institutionId, menuData, createdBy}
-    let add_menu = await helper.MenuHelper.createInstitutionMenu(institutionMenuData);
+    const ObjectId = require("mongoose").Types.ObjectId;
+    let data = {institutionId, menuData, createdBy}
+    const update = await helper.MenuHelper.findUpdateInstitutionMenu({
+      filter: {
+        institutionId: new ObjectId(institutionId),
+      },
+      update: {
+        $set: data,
+      },
+      options: { upsert: true, new: true },
+      data
+    });
+    if (!update.result)
+      return utils.send_json_error_response({
+        res,
+        data: update.result,
+        msg: update.message,
+        errorCode: "APP15",
+        statusCode: 502
+      });
     await logger.filecheck(
         `INFO: Institution menu created: by ${createdBy} at ${time} with data ${JSON.stringify(
-            add_menu
+            update
         )} \n`
     );
     return utils.send_json_response({
       res,
-      data: add_menu,
-      msg: "Institution menu added successfully",
+      data: update.result,
+      msg: `Institution menu successfully added.`,
       statusCode: 201
     });
   } catch (error) {
@@ -199,16 +217,35 @@ exports.addUserMenu = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     let data = {institutionId, userId, menuData, createdBy}
-    let add_menu = await helper.MenuHelper.createUserMenu(data);
+    const ObjectId = require("mongoose").Types.ObjectId;
+    const update = await helper.MenuHelper.findUpdateUserMenu({
+      filter: {
+        institutionId: new ObjectId(institutionId),
+        userId: new ObjectId(userId),
+      },
+      update: {
+        $set: data,
+      },
+      options: { upsert: true, new: true },
+      data
+    });
+    if (!update.result)
+      return utils.send_json_error_response({
+        res,
+        data: update.result,
+        msg: update.message,
+        errorCode: "APP15",
+        statusCode: 502
+      });
     await logger.filecheck(
         `INFO: User menu created: by ${createdBy} at ${time} with data ${JSON.stringify(
-            add_menu
+            update
         )} \n`
     );
     return utils.send_json_response({
       res,
-      data: add_menu,
-      msg: "User menu added successfully",
+      data: update.result,
+      msg: `User menu successfully added.`,
       statusCode: 201
     });
   } catch (error) {

@@ -14,6 +14,7 @@ const time = new Date(Date.now()).toLocaleString();
 const fs = require("fs");
 const XLSX = require("xlsx");
 const path = require("path");
+const appRoot = require("app-root-path");
 
 /**
  * @desc Candidate
@@ -81,7 +82,6 @@ exports.add = asyncHandler(async (req, res, next) => {
         errorCode: "E404",
         statusCode: 500,
       });
-    institution = institution[0];
     institutionId = institution._id;
     const check_candidate_already_created =
       await helper.CandidateHelper.getCandidate({
@@ -190,6 +190,73 @@ exports.add = asyncHandler(async (req, res, next) => {
       data: [],
       msg: `Institution Candidate create failed with error ${error.message}`,
       errorCode: error.errorCode,
+      statusCode: 500,
+    });
+  }
+});
+
+
+/**
+ * @desc Candidate
+ * @route POST /api/v2/candidate/photo
+ * @access PUBLIC
+ */
+exports.photoUrl = asyncHandler(async (req, res, next) => {
+  let validationSchema;
+  try {
+    /**
+     * validate request body
+     * @type {Joi.ObjectSchema<any>}
+     */
+    validationSchema = Joi.object({
+      id: Joi.string().required(),
+    });
+    const { error } = validationSchema.validate(req.body);
+    if (error)
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Candidate photoUrl validation failed with error: ${error.details[0].message}`,
+        errorCode: "INS01",
+        statusCode: 406,
+      });
+    const ObjectId = require("mongoose").Types.ObjectId;
+    let { id } = req.body;
+    if(!await utils.isValidObjectId(id))
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg:  "ID provided is invalid",
+        errorCode: "MEN17",
+        statusCode: 406
+      });
+    let where = {_id: new ObjectId(id)};
+    const candidate = await helper.CandidateHelper.getCandidate(where);
+    if (!candidate) {
+      return utils.send_json_error_response({
+        res,
+        data: [],
+        msg: `Candidate not found!`,
+        errorCode: "INS03",
+        statusCode: 404,
+      });
+    }
+    let candidateCode = candidate.candidateCode
+    let photoUrl = candidate.photoUrl
+    let institutionCode = candidate.institutionId.institutionCode
+    const url = new URL(`${req.protocol}://${req.get('host')}/institutions/${institutionCode}/candidates/${candidateCode}/photo/${photoUrl}`);
+    return utils.send_json_response({
+      res,
+      data: {url},
+      msg: `Candidate photo fetched successfully.`,
+      statusCode: 200,
+    });
+  } catch (error) {
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `Candidate photo fetch failed with error ${error.message}`,
+      errorCode: "INS02",
       statusCode: 500,
     });
   }

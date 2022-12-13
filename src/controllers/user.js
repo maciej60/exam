@@ -299,7 +299,6 @@ exports.addUser = asyncHandler(async (req, res, next) => {
         errorCode: "USR12",
         statusCode: 404
       });
-    institution = institution[0];
     institutionId = institution._id;
     const check_user_already_created = await helper.UserHelper.getUser({
       $or: [{ email }, { phone }],

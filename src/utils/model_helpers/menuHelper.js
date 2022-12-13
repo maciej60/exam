@@ -12,6 +12,8 @@ const Menu = require("../../models/Menu");
 const DeletedData = require("../../models/DeletedData");
 const utils = require("..");
 const number_format = require("locutus/php/strings/number_format");
+const Application = require("../../models/Application");
+const {is_null} = require("locutus/php/var");
 const time = new Date(Date.now()).toLocaleString();
 
 module.exports = {
@@ -20,8 +22,36 @@ module.exports = {
     return Menu.create(data);
   },
 
-  createInstitutionMenu: async (data) => {
-    return InstitutionMenu.create(data);
+  findUpdateInstitutionMenu: async (obj) => {
+    let res;
+    let result;
+    let check = await InstitutionMenu.findOne(obj.filter);
+    if (!check || is_null(check)) {
+      res = await InstitutionMenu.create(obj.data);
+    } else {
+      res = await InstitutionMenu.findOneAndUpdate(obj.filter, obj.update, obj.options);
+    }
+    result = res.toObject();
+    if (result) {
+      result.id = result._id;
+    }
+    return { result, message: "successful" };
+  },
+
+  findUpdateUserMenu: async (obj) => {
+    let res;
+    let result;
+    let check = await UserMenu.findOne(obj.filter);
+    if (!check || is_null(check)) {
+      res = await UserMenu.create(obj.data);
+    } else {
+      res = await UserMenu.findOneAndUpdate(obj.filter, obj.update, obj.options);
+    }
+    result = res.toObject();
+    if (result) {
+      result.id = result._id;
+    }
+    return { result, message: "successful" };
   },
 
   getMenu: async (data) => {
@@ -36,10 +66,6 @@ module.exports = {
     const del = await UserMenu.deleteMany({ userId: data.userId, institutionId: data.institutionId });
     return data.userMenuData ? UserMenu.insertMany(data.userMenuData) : false;
   },*/
-
-  createUserMenu: async (data) => {
-    return UserMenu.create(data);
-  },
 
   getUserMenu: async (data) => {
     return UserMenu.findOne(data).select('menuData userId institutionId -_id').populate({path: 'institutionId'}).populate({path: 'userId'});
