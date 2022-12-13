@@ -472,7 +472,6 @@ exports.logo = asyncHandler(async (req, res) => {
     console.log("begin update")
     let fileName = "";
     if(req.file){
-      console.log(req.file)
       const filePath = path.normalize(req.file.path);
       fileName = path.basename(filePath).toLocaleLowerCase();
       const data = { logo: fileName };
@@ -494,6 +493,12 @@ exports.logo = asyncHandler(async (req, res) => {
           errorCode: "INS06",
           statusCode: 500
         });
+      let r = await helper.imageUrl({
+        id,
+        type: "institution",
+        req,
+      });
+      update.result.logoUrl = r.result.href || null
       return utils.send_json_response({
         res,
         data: update.result,
@@ -546,7 +551,6 @@ exports.logoUrl = asyncHandler(async (req, res, next) => {
         errorCode: "INS01",
         statusCode: 406,
       });
-    const ObjectId = require("mongoose").Types.ObjectId;
     let { id } = req.body;
     if(!await utils.isValidObjectId(id))
       return utils.send_json_error_response({
@@ -556,26 +560,25 @@ exports.logoUrl = asyncHandler(async (req, res, next) => {
         errorCode: "MEN17",
         statusCode: 406
       });
-    let where = {_id: new ObjectId(id)};
-    const institution = await helper.InstitutionHelper.getInstitution(where);
-    if (!institution) {
-      return utils.send_json_error_response({
-        res,
-        data: [],
-        msg: `Institution not found!`,
-        errorCode: "INS03",
-        statusCode: 404,
-      });
-    }
-    const code = institution.institutionCode;
-    const logo = institution.logo;
-    const url = new URL(`${req.protocol}://${req.get('host')}/institutions/${code}/logo/${logo}`);
     //return res.sendFile(`${appRoot}/public/uploads/institutions/${code}/logo/${logo}`)
-    return utils.send_json_response({
+    let r = await helper.imageUrl({
+      id,
+      type: "institution",
+      req,
+    });
+    if(r.result)
+      return utils.send_json_response({
+        res,
+        data: {url: r.result.href},
+        msg: `Institution Logo fetched successfully.`,
+        statusCode: 200,
+      });
+    return utils.send_json_error_response({
       res,
-      data: {url},
-      msg: `Institution Logo fetched successfully.`,
-      statusCode: 200,
+      data: [],
+      msg: r.message,
+      errorCode: "INS02",
+      statusCode: 404,
     });
   } catch (error) {
     return utils.send_json_error_response({

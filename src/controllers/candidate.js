@@ -220,7 +220,6 @@ exports.photoUrl = asyncHandler(async (req, res, next) => {
         errorCode: "INS01",
         statusCode: 406,
       });
-    const ObjectId = require("mongoose").Types.ObjectId;
     let { id } = req.body;
     if(!await utils.isValidObjectId(id))
       return utils.send_json_error_response({
@@ -230,26 +229,24 @@ exports.photoUrl = asyncHandler(async (req, res, next) => {
         errorCode: "MEN17",
         statusCode: 406
       });
-    let where = {_id: new ObjectId(id)};
-    const candidate = await helper.CandidateHelper.getCandidate(where);
-    if (!candidate) {
-      return utils.send_json_error_response({
+    let r = await helper.imageUrl({
+      id,
+      type: "candidate",
+      req,
+    });
+    if(r.result)
+      return utils.send_json_response({
         res,
-        data: [],
-        msg: `Candidate not found!`,
-        errorCode: "INS03",
-        statusCode: 404,
+        data: {url: r.result.href},
+        msg: `Candidate photo fetched successfully.`,
+        statusCode: 200,
       });
-    }
-    let candidateCode = candidate.candidateCode
-    let photoUrl = candidate.photoUrl
-    let institutionCode = candidate.institutionId.institutionCode
-    const url = new URL(`${req.protocol}://${req.get('host')}/institutions/${institutionCode}/candidates/${candidateCode}/photo/${photoUrl}`);
-    return utils.send_json_response({
+    return utils.send_json_error_response({
       res,
-      data: {url},
-      msg: `Candidate photo fetched successfully.`,
-      statusCode: 200,
+      data: [],
+      msg: r.message,
+      errorCode: "INS02",
+      statusCode: 404,
     });
   } catch (error) {
     return utils.send_json_error_response({

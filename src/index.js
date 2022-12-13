@@ -35,6 +35,7 @@ const { protect } = require("./middleware/auth");
 /** Body parser */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.static('public/uploads'));
 
 // Mount routers
 app.get("/", (req, res) => {
@@ -71,7 +72,6 @@ app.use("/api/v2/communication", communication);
 app.use("/api/v2/test", test);
 
 app.use(ErrorHandler);
-app.use(express.static('public/uploads'));
 
 // catch 404 and forwarding to error handler
 app.use(function (req, res) {
