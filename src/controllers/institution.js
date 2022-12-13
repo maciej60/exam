@@ -459,7 +459,7 @@ exports.logo = asyncHandler(async (req, res) => {
         data: [],
         msg: `${subjectPascal} logo upload validation failed with error: ${error.details[0].message}`,
         errorCode: "INS06",
-        statusCode: 500
+        statusCode: 400
       });
     if(!await utils.isValidObjectId(id))
       return utils.send_json_error_response({
@@ -508,7 +508,7 @@ exports.logo = asyncHandler(async (req, res) => {
         data: {},
         msg: `File not uploaded`,
         errorCode: "INS06",
-        statusCode: 500
+        statusCode: 400
       });
     }
   } catch (error) {
