@@ -29,7 +29,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = await Application.aggregate([
+    const v = Application.aggregate([
       {
         $match: where,
       },
@@ -133,7 +133,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = await ApplicationStage.aggregate([
+    const v = ApplicationStage.aggregate([
       {
         $match: where,
       },
@@ -222,7 +222,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = await ApplicationUserPermission.aggregate([
+    const v = ApplicationUserPermission.aggregate([
       {
         $match: where,
       },
@@ -316,7 +316,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = await ApplicationDocumentType.aggregate([
+    const v = ApplicationDocumentType.aggregate([
       {
         $match: where,
       },

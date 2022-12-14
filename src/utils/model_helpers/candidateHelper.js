@@ -47,7 +47,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = await Candidate.aggregate([
+    const v = Candidate.aggregate([
       {
         $match: where,
       },
@@ -117,7 +117,7 @@ module.exports = {
   },
 
   getCandidate: async (where) => {
-    return Candidate.findOne(where).populate({path: 'institutionId'});
+    return Candidate.findOne(where).populate({path: 'institutionId'}).lean();
   },
 
   uploadCandidates: async (data) => {
@@ -161,7 +161,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = await CandidateDocument.aggregate([
+    const v = CandidateDocument.aggregate([
       {
         $match: where,
       },

@@ -10,6 +10,7 @@ const User = require("../../models/User");
 const utils = require("../");
 const Application = require("../../models/Application");
 const {is_null} = require("locutus/php/var");
+const helper = require("./index");
 const time = new Date(Date.now()).toLocaleString();
 
 async function generateInstitutionCode(append = "", prepend = "") {
@@ -46,9 +47,9 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = await Institution.aggregate([
+    const v = Institution.aggregate([
       {
-        $match: where,
+        $match: where
       },
       { $sort: { createdAt: -1 } },
       {
@@ -79,7 +80,7 @@ module.exports = {
   },
 
   getInstitution: async (where) => {
-    return Institution.findOne(where).populate({path: 'businessId'});
+    return Institution.findOne(where).populate({path: 'businessId'}).lean();
   },
 
   findUpdate: async ({
@@ -111,7 +112,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = await InstitutionDocumentType.aggregate([
+    const v =  InstitutionDocumentType.aggregate([
       {
         $match: where,
       },

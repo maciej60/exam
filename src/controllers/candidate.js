@@ -484,7 +484,6 @@ exports.list = asyncHandler(async (req, res, next) => {
     if (!_.isEmpty(req.body.gender) && req.body.gender) {
       where.gender = (req.body.gender);
     }
-    console.log(where)
     /**
      * build query options for mongoose-paginate
      */
@@ -506,6 +505,20 @@ exports.list = asyncHandler(async (req, res, next) => {
       queryOptions,
     });
     if (objWithoutMeta.data && !_.isEmpty(objWithoutMeta.data)) {
+      /**
+       * build photoUrl into result-set
+       */
+      let rr = [];
+      for(let i of objWithoutMeta.data){
+        let r = await helper.imageUrl({
+          id: i._id,
+          type: "candidate",
+          req,
+        });
+        i.photoUrl = r.result.href;
+        rr.push(i)
+      }
+      objWithoutMeta.data = rr;
       /**
        * build response data meta for pagination
        */
@@ -731,8 +744,14 @@ exports.getCandidate = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     let where = {_id: new ObjectId(id)};
-    const obj = await helper.CandidateHelper.getCandidate(where);
+    let obj = await helper.CandidateHelper.getCandidate(where);
     if(!_.isEmpty(obj)) {
+      let r = await helper.imageUrl({
+        id,
+        type: "candidate",
+        req,
+      });
+      obj.photoUrl = r.result.href || null;
       await logger.filecheck(
           `INFO: ${subject} fetched successfully by: ${createdBy} with data ${JSON.stringify(
               obj

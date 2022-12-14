@@ -64,7 +64,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = await User.aggregate([
+    const v =  User.aggregate([
       {
         $match: where,
       },
@@ -146,7 +146,7 @@ module.exports = {
     let model = data.model
       ? require("../../models/" + data.model)
       : require("../../models/User");
-    const v = await model.distinct(data.fields, data.where);
+    const v =  model.distinct(data.fields, data.where);
     return v;
   },
 

@@ -308,7 +308,6 @@ exports.list = asyncHandler(async (req, res, next) => {
     /**
      * fetch paginated data using queryOptions
      */
-    const ObjectId = require("mongoose").Types.ObjectId;
     let where = {};
     if (!_.isEmpty(req.body.name) && req.body.name) {
       where.name = {
@@ -330,6 +329,21 @@ exports.list = asyncHandler(async (req, res, next) => {
       queryOptions,
     });
     if (objWithoutMeta.data && !_.isEmpty(objWithoutMeta.data)) {
+      /**
+       * build logoUrl into result-set
+       */
+      let rr = [];
+      for(let i of objWithoutMeta.data){
+        let r = await helper.imageUrl({
+          id: i._id,
+          type: "institution",
+          req,
+        });
+        i.logoUrl = r.result.href;
+        rr.push(i)
+      }
+      objWithoutMeta.data = rr;
+
       /**
        * build response data meta for pagination
        */
@@ -662,8 +676,14 @@ exports.getInstitution = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     let where = {_id: new ObjectId(id)};
-    const obj = await helper.InstitutionHelper.getInstitution(where);
+    let obj = await helper.InstitutionHelper.getInstitution(where);
     if(!_.isEmpty(obj)) {
+      let r = await helper.imageUrl({
+        id,
+        type: "institution",
+        req,
+      });
+      obj.logoUrl = r.result.href || null;
       await logger.filecheck(
           `INFO: ${subject} fetched successfully by: ${createdBy} with data ${JSON.stringify(
               obj
