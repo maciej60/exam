@@ -47,7 +47,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = Candidate.aggregate([
+    const v = await Candidate.aggregate([
       {
         $match: where,
       },
@@ -121,7 +121,7 @@ module.exports = {
   },
 
   uploadCandidates: async (data) => {
-    return await Candidate.insertMany(data);
+    return Candidate.insertMany(data);
   },
 
   findUpdate: async ({ filter: filter, update: update, options: options }) => {
@@ -161,7 +161,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = CandidateDocument.aggregate([
+    const v = await CandidateDocument.aggregate([
       {
         $match: where,
       },

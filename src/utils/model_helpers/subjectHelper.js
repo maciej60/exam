@@ -44,7 +44,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = Subject.aggregate([
+    const v = await Subject.aggregate([
       {
         $match: where,
       },
@@ -128,7 +128,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = SubjectTopic.aggregate([
+    const v = await SubjectTopic.aggregate([
       {
         $match: where,
       },
@@ -230,7 +230,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = SubTopic.aggregate([
+    const v = await SubTopic.aggregate([
       {
         $match: where,
       },

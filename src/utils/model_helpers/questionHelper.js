@@ -19,7 +19,7 @@ module.exports = {
         const options = {
             ...queryOptions,
         };
-        const v = QuestionBank.aggregate([
+        const v = await QuestionBank.aggregate([
             {
                 $match: where,
             },

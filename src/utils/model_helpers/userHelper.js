@@ -64,8 +64,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    console.log(where)
-    const v = User.aggregate([
+    const v = await User.aggregate([
       {
         $match: where,
       },
@@ -155,8 +154,7 @@ module.exports = {
     let model = data.model
       ? require("../../models/" + data.model)
       : require("../../models/User");
-    const v = await model.find(data.where).select(data.fields);
-    return v;
+    return model.find(data.where).select(data.fields);
   },
 
 };

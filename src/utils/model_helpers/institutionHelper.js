@@ -46,7 +46,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = Institution.aggregate([
+    const v = await Institution.aggregate([
       {
         $match: where,
       },
@@ -111,7 +111,7 @@ module.exports = {
     const options = {
       ...queryOptions,
     };
-    const v = InstitutionDocumentType.aggregate([
+    const v = await InstitutionDocumentType.aggregate([
       {
         $match: where,
       },
