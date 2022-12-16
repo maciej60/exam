@@ -7,7 +7,6 @@ const strings = require("locutus/php/strings");
 const UserMenu = require("../../models/UserMenu");
 const InstitutionMenu = require("../../models/InstitutionMenu");
 const MenuHeader = require("../../models/MenuHeader");
-const Module = require("../../models/Module");
 const Menu = require("../../models/Menu");
 const DeletedData = require("../../models/DeletedData");
 const utils = require("..");
@@ -55,7 +54,7 @@ module.exports = {
   },
 
   getMenu: async (data) => {
-    return Menu.find(data).populate({path: 'menuHeaderId'}).populate({path: 'moduleId'});
+    return Menu.find(data).populate({path: 'menuHeaderId'});
   },
 
   getInstitutionMenu: async (data) => {

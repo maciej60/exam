@@ -8,10 +8,6 @@ const oSchema = new mongoose.Schema({
             required: true,
             ref: "MenuHeader",
         },
-        moduleId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Module",
-        },
         /*menuPath: {
             type: String,
             trim: true,
