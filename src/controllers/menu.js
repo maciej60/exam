@@ -321,9 +321,9 @@ exports.getInstitutionMenu = asyncHandler(async (req, res, next) => {
         statusCode: 406
       });
     const obj = await helper.MenuHelper.getInstitutionMenu({institutionId});
-    const main = await helper.MenuHelper.getMenu({});
-    const build = utils.buildMenu(main, obj)
     if(!_.isEmpty(obj)) {
+      const main = await helper.MenuHelper.getMenu({});
+      const build = utils.buildMenu(main, obj)
       await logger.filecheck(
           `INFO: Institution menu of ${institutionId} fetched successfully by: ${createdBy} with data ${JSON.stringify(
               obj
@@ -390,9 +390,9 @@ exports.getUserMenu = asyncHandler(async (req, res, next) => {
         errorCode: "MEN17",
         statusCode: 404
       });
-    const main = await helper.MenuHelper.getMenu({});
-    const build = utils.buildMenu(main, obj)
-    if(obj){
+    if(!_.isEmpty(obj)) {
+      const main = await helper.MenuHelper.getMenu({});
+      const build = utils.buildMenu(main, obj)
       await logger.filecheck(
           `INFO: User menu of ${userId} fetched successfully by: ${createdBy} with data ${JSON.stringify(
               obj
