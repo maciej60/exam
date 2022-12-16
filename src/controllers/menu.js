@@ -19,7 +19,7 @@ const time = new Date(Date.now()).toLocaleString();
 exports.addMenu = asyncHandler(async (req, res, next) => {
   try{
     let createdBy = req.user.id;
-    let { menuObject, menuHeaderId, moduleId, forSystemAdmin, forInstitutionAdmin } = req.body;
+    let { menuObject, menuHeaderId, forSystemAdmin, forInstitutionAdmin } = req.body;
     if (!menuObject) {
       return utils.send_json_error_response({
         res,
@@ -46,24 +46,7 @@ exports.addMenu = asyncHandler(async (req, res, next) => {
         errorCode: "MEN17",
         statusCode: 406
       });
-    if (!moduleId) {
-      return utils.send_json_error_response({
-        res,
-        data: [],
-        msg: "Menu module is required",
-        errorCode: "MEN02",
-        statusCode: 400
-      });
-    }
-    if(!await utils.isValidObjectId(moduleId))
-      return utils.send_json_error_response({
-        res,
-        data: [],
-        msg:  "Module ID provided is invalid",
-        errorCode: "MEN17",
-        statusCode: 406
-      });
-    let SystemMenuData = { menuObject, moduleId, menuHeaderId, forSystemAdmin, forInstitutionAdmin}
+    let SystemMenuData = { menuObject, menuHeaderId, forSystemAdmin, forInstitutionAdmin}
     let add_menu = await helper.MenuHelper.createMenu(SystemMenuData);
     await logger.filecheck(
         `INFO: System menu created: by ${createdBy} at ${time} with data ${JSON.stringify(
@@ -269,9 +252,6 @@ exports.getMenu = asyncHandler(async (req, res, next) => {
     let createdBy = req.user.id;
     const ObjectId = require("mongoose").Types.ObjectId;
     let where = {};
-    if (!_.isEmpty(req.body.moduleId) && req.body.moduleId && await utils.isValidObjectId(req.body.moduleId)) {
-      where.moduleId = new ObjectId(req.body.moduleId);
-    }
     if (!_.isEmpty(req.body.menuHeaderId) && req.body.menuHeaderId && await utils.isValidObjectId(req.body.menuHeaderId)) {
       where.menuHeaderId = new ObjectId(req.body.menuHeaderId);
     }
