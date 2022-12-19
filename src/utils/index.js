@@ -288,6 +288,17 @@ module.exports = {
     return builtMenuHeader
   },
 
+  getMenuDataFromMain: async (main) => {
+    let arr = []
+    for(let m of main){
+      _.forEach(m.menuObject,  (u) => {
+        arr.push(u.path.toString())
+      })
+    }
+    let menuData = arr.join(",")
+    return { menuData }
+  },
+
   pascal_to_underscore: async (str) => {
     if (str.constructor === Array) {
       // if (!Array.isArray(str)) {

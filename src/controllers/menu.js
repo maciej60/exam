@@ -261,8 +261,11 @@ exports.getMenu = asyncHandler(async (req, res, next) => {
     if (req.body.hasOwnProperty("forInstitutionAdmin")) {
       where.forInstitutionAdmin = parseInt(req.body.forInstitutionAdmin);
     }
-    const obj = await helper.MenuHelper.getMenu(where);
-    if(!_.isEmpty(obj)) {
+    const obj1 = await helper.MenuHelper.getMenu(where);
+    if(!_.isEmpty(obj1)) {
+      const obj = await utils.getMenuDataFromMain(obj1);
+      const main = await helper.MenuHelper.getMenu({});
+      const build = utils.buildMenu(main, obj)
       await logger.filecheck(
           `INFO: System menu fetched successfully by: ${createdBy} with data ${JSON.stringify(
               obj
@@ -270,7 +273,7 @@ exports.getMenu = asyncHandler(async (req, res, next) => {
       );
       return utils.send_json_response({
         res,
-        data: obj,
+        data: build,
         msg: "System menu successfully fetched",
         statusCode: 200
       });
