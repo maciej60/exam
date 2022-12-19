@@ -29,20 +29,55 @@ exports.login = asyncHandler(async (req, res, next) => {
     });
   }
   let check_user;
-  if (
-      loginType === "institution" ||
-      loginType === "sysAdmin" ||
-      loginType === "staff"
-  ) {
+  if (loginType === "sysAdmin") {
     check_user = await helper.UserHelper.getUser({
-      $or: [{ email: login }, { phone: login }],
+      $and: [
+        { $or: [{ email: login }, { phone: login }] },
+        { isSystemAdmin: 1 }
+      ]
     });
-  } else if (loginType === "candidate") {
+  }else if (loginType === "institution") {
+    check_user = await helper.UserHelper.getUser({
+      $and: [
+        { $or: [{ email: login }, { phone: login }] },
+        { isInstitutionAdmin: 1 }
+      ]
+    });
+  }else if (loginType === "lms") {
+    check_user = await helper.UserHelper.getUser({
+      $and: [
+        { $or: [{ email: login }, { phone: login }] },
+        { isLmsAdmin: 1 }
+      ]
+    });
+  }else if (loginType === "staff") {
+    check_user = await helper.UserHelper.getUser({
+      $and: [
+        { $or: [{ email: login }, { phone: login }] },
+        { isInstitutionAdmin: 0, isSystemAdmin: 0, isLmsAdmin: 0 }
+      ]
+    });
+  }else if (loginType === "candidate") {
     check_user = await helper.CandidateHelper.getCandidate({
       $or: [{ email: login }, { phone: login }],
     });
-  }else{
+    if(!_.isEmpty(check_user)) {
+      let r = await helper.imageUrl({
+        id: check_user._id,
+        type: "candidate",
+        req,
+      });
+      check_user.photoUrl = r.result.href || null;
+    }
+  }else {
     check_user = null;
+    return utils.send_json_error_response({
+      res,
+      data: [],
+      msg: `loginType: ${loginType} provided is invalid`,
+      errorCode: "AUTH02",
+      statusCode: 404,
+    });
   }
   if (!check_user) {
     return utils.send_json_error_response({
