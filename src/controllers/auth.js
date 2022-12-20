@@ -100,7 +100,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   }
   if (check_user.firstLogin === 1) {
     return utils.sendNoTokenResponse(
-        check_user,
+        {user: check_user},
         200,
         res,
         "First time login, kindly change your password",
